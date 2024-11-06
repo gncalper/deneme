@@ -5,19 +5,14 @@ pipeline {
         stage('Clean') {
             steps {
                 script {
-                    // Kısa commit hash değerini al
                     def shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
                     echo "Short Commit: ${shortCommit}"
 
-                    // Commit yapan kişinin adını al
                     def authorName = sh(returnStdout: true, script: "git log -1 --pretty=format:'%an'").trim()
                     echo "GIT_AUTHOR_NAME: ${authorName}"
 
-                    def comitterName = sh(returnStdout: true, script: "git log -1 --pretty=format:'%an'").trim()
-                    echo "GIT_COMMITTER_NAME: ${comitterName}"
-                    // Commit ID'sini al
-                    def commitId = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
-                    echo "GIT_COMMIT: ${commitId}"
+                    def commitMessage = sh(returnStdout: true, script: "git log -1 --pretty=%B").trim()
+                    echo "Commit Message: ${commitMessage}"
                 }
             }
         }
