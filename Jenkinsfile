@@ -13,6 +13,8 @@ pipeline {
                     def authorName = sh(returnStdout: true, script: "git log -1 --pretty=format:'%an'").trim()
                     echo "GIT_AUTHOR_NAME: ${authorName}"
 
+                    def comitterName = sh(returnStdout: true, script: "git log -1 --pretty=format:'%an'").trim()
+                    echo "GIT_COMMITTER_NAME: ${comitterName}"
                     // Commit ID'sini al
                     def commitId = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
                     echo "GIT_COMMIT: ${commitId}"
