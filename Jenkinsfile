@@ -1,27 +1,24 @@
 pipeline {
     agent any
 
+    environment {
+        SHORT_COMMIT = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
+        AUTHOR_NAME = sh(returnStdout: true, script: "git log -1 --pretty=format:'%an'").trim()
+        COMMIT_MESSAGE = sh(returnStdout: true, script: "git log -1 --pretty=%B").trim()
+    }
+
     stages {
         stage('Clean') {
             steps {
-                script {
-                    def shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
-                    echo "Short Commit: ${shortCommit}"
-
-                    def authorName = sh(returnStdout: true, script: "git log -1 --pretty=format:'%an'").trim()
-                    echo "GIT_AUTHOR_NAME: ${authorName}"
-
-                    def commitMessage = sh(returnStdout: true, script: "git log -1 --pretty=%B").trim()
-                    echo "Commit Message: ${commitMessage}"
-                }
-
-             stage('Push') {
-
-                steps {
-                    sh  " echo 'Short Commit: ${shortCommit}' "
-                }
+                echo "Short Commit: ${SHORT_COMMIT}"
+                echo "GIT_AUTHOR_NAME: ${AUTHOR_NAME}"
+                echo "Commit Message: ${COMMIT_MESSAGE}"
+            }
+        }
+        stage('Push') {
+            steps {
+                sh "echo 'Short Commit: ${SHORT_COMMIT}'"
             }
         }
     }
- }
 }
