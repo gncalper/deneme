@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Push') {
             steps {
-                sh "echo 'Short Commit: ${SHORT_COMMIT}'"
+                sh echo "Commit Message: ${COMMIT_MESSAGE}"
             }
         }
     }
