@@ -14,6 +14,12 @@ pipeline {
                     def commitMessage = sh(returnStdout: true, script: "git log -1 --pretty=%B").trim()
                     echo "Commit Message: ${commitMessage}"
                 }
+
+             stage('Push') {
+
+                steps {
+                    sh  " echo 'Short Commit: ${shortCommit}' "
+                }
             }
         }
     }
