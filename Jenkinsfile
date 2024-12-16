@@ -6,6 +6,16 @@ pipeline {
         COMMIT_MESSAGE = sh(returnStdout: true, script: "git log -1 --pretty=%B").trim()
         MERGE_COMMIT_MESSAGE = sh(returnStdout: true, script: "git log -1 --merges --pretty=%B").trim()
     }
+    parameters {
+         gitParameter branchFilter: '(develop|release|feature-release*)',
+         defaultValue: 'develop',
+         name: 'BRANCH',
+         type: 'PT_BRANCH',
+         description: 'choose your branch',
+         selectedValue: 'DEFAULT',
+         sortMode: 'DESCENDING_SMART'
+
+      }
 
     stages {
         stage('Clean') {
