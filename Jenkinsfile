@@ -13,7 +13,7 @@ pipeline {
          type: 'PT_BRANCH',
          description: 'choose your branch',
          selectedValue: 'DEFAULT',
-         sortMode: 'DESCENDING_SMART'
+         sortMode: 'ASCENDING_SMART'
 
       }
 
