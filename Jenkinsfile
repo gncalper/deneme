@@ -7,7 +7,7 @@ pipeline {
         MERGE_COMMIT_MESSAGE = sh(returnStdout: true, script: "git log -1 --merges --pretty=%B").trim()
     }
     parameters {
-         gitParameter branchFilter: '^(develop|release|feature-release*)$',
+         gitParameter branchFilter: '(develop|release|feature-release*)',
          defaultValue: 'develop',
          name: 'BRANCH',
          type: 'PT_BRANCH',
