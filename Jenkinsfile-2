@@ -18,6 +18,7 @@ pipeline {
                 script {
                         env.KUBECONFIG = "${env.HOME}/.kube/config"
                         sh "kubectl get po"
+                        sh "echo 'Branch name is: ${env.BRANCH_NAME}' "
                 }
             }
         }
