@@ -10,9 +10,6 @@ def getAgentLabel() {
 pipeline {
 
     agent none
-    environment {
-        KUBECONFIG = '$HOME/.kube/config'
-    }
 
     stages {
         stage('Package Application') {
