@@ -1,0 +1,36 @@
+def getAgentLabel() {
+    if (env.BRANCH_NAME == 'master') {
+        return 'uni4edu-prod'
+    } else {
+        return 'uni4edu'
+    }
+}
+
+
+pipeline {
+
+    agent none
+    environment {
+        KUBECONFIG = '$HOME/.kube/config'
+    }
+
+    stages {
+        stage('Package Application') {
+            agent { label getAgentLabel() }
+            steps {
+                script {
+                        env.KUBECONFIG = "${env.HOME}/.kube/config"
+                        sh "kubectl get po"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            agent { label getAgentLabel() }
+            steps {
+                sh 'ls'
+            }
+        }
+    }
+}
