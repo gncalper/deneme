@@ -23,11 +23,9 @@ pipeline {
         }
     }
     post {
-        always {
-            agent { label getAgentLabel() }
-            steps {
+         always {
+                agent { label getAgentLabel() }
                 sh 'ls'
-            }
         }
     }
 }
