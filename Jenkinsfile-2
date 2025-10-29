@@ -10,12 +10,12 @@ pipeline {
 
                         withCredentials([gitUsernamePassword(credentialsId: 'alper', gitToolName: 'Default')]) {
                             sh """
+                                sleep 10
                                 git pull origin master
                                 sed -i "s/^a=.*/a=${BUILD_NUMBER}/" a.txt
                                 git add .
                                 git commit -m "change"
                                 git push origin HEAD:master
-                                sleep 10
                             """
                         }
                     }
