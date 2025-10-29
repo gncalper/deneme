@@ -10,12 +10,11 @@ pipeline {
 
                         withCredentials([gitUsernamePassword(credentialsId: 'alper', gitToolName: 'Default')]) {
                             sh """
-                                sed -i "s/^a=.*/a=${BUILD_NUMBER}/" a.txt
-
-                                git add .
-                                git commit -m "change"
                                 git fetch origin master
                                 git rebase origin/master
+                                sed -i "s/^a=.*/a=${BUILD_NUMBER}/" a.txt
+                                git add .
+                                git commit -m "change"
                                 git push origin HEAD:master
                             """
                         }
