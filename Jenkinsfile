@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Git Push') {
             steps {
                 lock(resource: 'git-push-lock') {
@@ -18,10 +17,12 @@ pipeline {
                                 git config --global user.password "${GIT_PASSWORD}"
                                 git add .
                                 git commit -m "Automated update [ci skip]" || echo "Nothing to commit"
-                                git push https://\$GIT_USERNAME:\$GIT_TOKEN@github.com/username/repo.git HEAD:master
+                                git push HEAD:master
                             """
                         }
                     }
                 }
             }
         }
+    }
+}
