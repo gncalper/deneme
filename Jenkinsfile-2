@@ -15,6 +15,7 @@ pipeline {
                                 git add .
                                 git commit -m "change"
                                 git push origin HEAD:master
+                                sleep 10
                             """
                         }
                     }
