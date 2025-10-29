@@ -17,8 +17,8 @@ pipeline {
 
                         echo "Performing git push safely."
                         sh '''
-                            git config --global user.name "${GIT_USERNAME}"
-                            git config --global user.password "${GIT_PASSWORD}"
+                            git config user.name "${GIT_USERNAME}"
+                            git config user.password "${GIT_PASSWORD}"
                             git add .
                             git commit -m "Automated update [ci skip]" || echo "Nothing to commit"
                             git push origin HEAD:master
