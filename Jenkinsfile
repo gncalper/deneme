@@ -21,7 +21,7 @@ pipeline {
                             git config --global user.password "${GIT_PASSWORD}"
                             git add .
                             git commit -m "Automated update [ci skip]" || echo "Nothing to commit"
-                            git push origin HEAD:main
+                            git push
                         '''
                     }
                 }
