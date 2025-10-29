@@ -13,6 +13,8 @@ pipeline {
 
                         withCredentials([gitUsernamePassword(credentialsId: 'alper',gitToolName: 'git-tool')]) {
                             sh """
+                                git config --global user.name "${GIT_USERNAME}"
+                                git config --global user.password "${GIT_PASSWORD}"
                                 git add .
                                 git commit -m "Automated update [ci skip]" || echo "Nothing to commit"
                                 git push
