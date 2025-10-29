@@ -7,13 +7,15 @@ pipeline {
                 lock(resource: 'git-push-lock') {
                     script {
                         echo "Lock acquired — updating a.txt and pushing to Git..."
-                        sleep 10
+
                         withCredentials([gitUsernamePassword(credentialsId: 'alper', gitToolName: 'Default')]) {
                             sh """
                                 sed -i "s/^a=.*/a=${BUILD_NUMBER}/" a.txt
 
                                 git add .
                                 git commit -m "change"
+                                git fetch origin master
+                                git rebase origin/master
                                 git push origin HEAD:master
                             """
                         }
