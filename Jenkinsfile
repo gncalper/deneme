@@ -11,7 +11,7 @@ pipeline {
 
                         echo "Performing git push safely."
 
-                        withCredentials([gitusernamePassword(credentialsId: 'alper']) {
+                        withCredentials([gitUsernamePassword(credentialsId: 'my-credentials-id',gitToolName: 'git-tool')]) {
                             sh """
                                 git add .
                                 git commit -m "Automated update [ci skip]" || echo "Nothing to commit"
