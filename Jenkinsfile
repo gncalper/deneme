@@ -11,7 +11,7 @@ pipeline {
 
                         echo "Performing git push safely."
 
-                        withCredentials([usernamePassword(credentialsId: 'alper', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
+                        withCredentials([usernamePassword(credentialsId: 'alper', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                             sh """
                                 git config --global user.name "${GIT_USERNAME}"
                                 git config --global user.password "${GIT_PASSWORD}"
