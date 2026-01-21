@@ -1,13 +1,7 @@
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'WORKSPACE', defaultValue: '', description: 'Workspace name')
-        string(name: 'PROJECT', defaultValue: '', description: 'Project name')
-        string(name: 'CONFIG_DIR', defaultValue: '', description: 'Config directory')
-        string(name: 'NAMESPACE', defaultValue: '', description: 'Kubernetes namespace')
-        booleanParam(name: 'FRONTEND', defaultValue: true, description: 'Build frontend image')
-    }
+
 
     environment {
         CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/${params.WORKSPACE}/${params.PROJECT}"
