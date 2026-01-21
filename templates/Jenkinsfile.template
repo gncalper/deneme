@@ -10,7 +10,7 @@ pipeline {
     }
 
     environment {
-        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/${WORKSPACE}/${PROJECT}"
+        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/${params.WORKSPACE}/${params.PROJECT}"
     }
 
     stages {
@@ -21,7 +21,7 @@ pipeline {
                     echo 'Preparing backend workspace...'
                     sh '''
                         mkdir -p backend-temp
-                        cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/Backend/* backend-temp/
+                        cp -R ${CUSTOMER_CODE_DIR}/${params.CONFIG_DIR}/Backend/* backend-temp/
                     '''
                 }
             }
@@ -35,7 +35,7 @@ pipeline {
                 script {
                     sh '''
                         mkdir -p frontend-temp
-                        cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/React/ReactProjectTemplate/* frontend-temp/
+                        cp -R ${CUSTOMER_CODE_DIR}/${params.CONFIG_DIR}/React/ReactProjectTemplate/* frontend-temp/
                     '''
                 }
             }
