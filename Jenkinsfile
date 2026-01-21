@@ -25,7 +25,7 @@ pipeline {
                         .replace('${NAMESPACE}', params.NAMESPACE)
 
                     // Jenkinsfile olarak yaz
-                    writeFile file: 'Jenkinsfile', text: result
+                    writeFile file: 'Jenkinsfile-test', text: result
 
                     echo 'Jenkinsfile successfully generated'
                 }
