@@ -2,15 +2,17 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'WORKSPACE', defaultValue: '', description: 'Workspace name')
-        string(name: 'PROJECT', defaultValue: '', description: 'Project name')
-        string(name: 'CONFIG_DIR', defaultValue: '', description: 'Config directory')
-        string(name: 'NAMESPACE', defaultValue: '', description: 'Kubernetes namespace')
-        booleanParam(name: 'FRONTEND', defaultValue: true, description: 'Build frontend image')
+        string(name: 'WORKSPACE', defaultValue: '')
+        string(name: 'PROJECT', defaultValue: '')
+        string(name: 'CONFIG_DIR', defaultValue: '')
+        string(name: 'NAMESPACE', defaultValue: '')
+        booleanParam(name: 'FRONTEND', defaultValue: true)
     }
 
-
-
+    environment {
+        CUSTOMER_CODE_DIR =
+            "/home/generated-apps/temp/platform/${params.WORKSPACE}/${params.PROJECT}"
+    }
     stages {
 
         stage('Prepare Backend Workspace') {
