@@ -10,11 +10,7 @@ pipeline {
     }
 
     environment {
-        WORKSPACE = "params.WORKSPACE"
-        PROJECT   = "params.PROJECT"
-        CONFIG_DIR = "params.CONFIG_DIR"
         CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/${WORKSPACE}/${PROJECT}"
-        NAMESPACE = "params.NAMESPACE"
     }
 
     stages {
