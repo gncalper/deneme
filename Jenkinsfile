@@ -1,9 +1,4 @@
 pipeline {
-    agent {
-        node {
-            label 'platform'
-        }
-    }
 
     parameters {
         string(name: 'WORKSPACE', defaultValue: '', description: 'Workspace name')
