@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'WORKSPACE', defaultValue: '')
-        string(name: 'PROJECT', defaultValue: '')
-        string(name: 'CONFIG_DIR', defaultValue: '')
-        string(name: 'NAMESPACE', defaultValue: '')
+        string(name: 'WORKSPACE', defaultValue: '${params.WORKSPACE}')
+        string(name: 'PROJECT', defaultValue: '${params.PROJECT}')
+        string(name: 'CONFIG_DIR', defaultValue: '${params.CONFIG_DIR}')
+        string(name: 'NAMESPACE', defaultValue: '${params.NAMESPACE}')
         booleanParam(name: 'FRONTEND', defaultValue: true)
     }
 
