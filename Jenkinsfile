@@ -10,24 +10,21 @@ pipeline {
     }
 
     stages {
-
         stage('Generate Jenkinsfile') {
             steps {
                 script {
-                    // Template dosyasını oku
                     def template = readFile 'templates/Jenkinsfile.template'
 
-                    // Parametreleri replace et
                     def result = template
-                        .replace('${WORKSPACE}', params.WORKSPACE)
-                        .replace('${PROJECT}', params.PROJECT)
-                        .replace('${CONFIG_DIR}', params.CONFIG_DIR)
-                        .replace('${NAMESPACE}', params.NAMESPACE)
+                        .replace('__WORKSPACE__', params.WORKSPACE)
+                        .replace('__PROJECT__', params.PROJECT)
+                        .replace('__CONFIG_DIR__', params.CONFIG_DIR)
+                        .replace('__NAMESPACE__', params.NAMESPACE)
+                        .replace('__FRONTEND__', params.FRONTEND.toString())
 
-                    // Jenkinsfile olarak yaz
                     writeFile file: 'Jenkinsfile-test', text: result
 
-                    echo 'Jenkinsfile successfully generated'
+                    echo 'Jenkinsfile-test generated successfully'
                 }
             }
         }
