@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        WORKSPACE      = "__WORKSPACE__"
-        PROJECT        = "__PROJECT__"
-        CONFIG_DIR     = "__CONFIG_DIR__"
-        NAMESPACE      = "__NAMESPACE__"
-        FRONTEND       = "__FRONTEND__"
+        WORKSPACE      = '__WORKSPACE__'
+        PROJECT        = '__PROJECT__'
+        CONFIG_DIR     = '__CONFIG_DIR__'
+        NAMESPACE      = '__NAMESPACE__'
+        FRONTEND       = '__FRONTEND__'
         CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/${WORKSPACE}/${PROJECT}"
     }
 
@@ -15,12 +15,12 @@ pipeline {
         stage('Debug Env') {
             steps {
                 sh """
-                    echo "WORKSPACE=${WORKSPACE}"
-                    echo "PROJECT=${PROJECT}"
-                    echo "CONFIG_DIR={$CONFIG_DIR}"
-                    echo "NAMESPACE=${NAMESPACE}"
-                    echo "FRONTEND=${FRONTEND}"
-                    echo "CUSTOMER_CODE_DIR=${CUSTOMER_CODE_DIR}"
+                    echo "WORKSPACE is${WORKSPACE}"
+                    echo "PROJECT is${PROJECT}"
+                    echo "CONFIG_DIR is{$CONFIG_DIR}"
+                    echo "NAMESPACE is${NAMESPACE}"
+                    echo "FRONTEND is${FRONTEND}"
+                    echo "CUSTOMER_CODE_DIR is ${CUSTOMER_CODE_DIR}"
                 """
             }
         }
