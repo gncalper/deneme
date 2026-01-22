@@ -15,11 +15,11 @@ pipeline {
         stage('Debug Env') {
             steps {
                 sh """
-                    echo "WORKSPACE is${WORKSPACE}"
-                    echo "PROJECT is${PROJECT}"
-                    echo "CONFIG_DIR is{$CONFIG_DIR}"
-                    echo "NAMESPACE is${NAMESPACE}"
-                    echo "FRONTEND is${FRONTEND}"
+                    echo "WORKSPACE is ${WORKSPACE}"
+                    echo "PROJECT is ${PROJECT}"
+                    echo "CONFIG_DIR is ${$CONFIG_DIR}"
+                    echo "NAMESPACE is ${NAMESPACE}"
+                    echo "FRONTEND is ${FRONTEND}"
                     echo "CUSTOMER_CODE_DIR is ${CUSTOMER_CODE_DIR}"
                 """
             }
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 sh """
                     mkdir -p backend-temp
-                    cp -R $CUSTOMER_CODE_DIR/$CONFIG_DIR/Backend/* backend-temp/
+                    cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/Backend/* backend-temp/
                 """
             }
         }
@@ -41,7 +41,7 @@ pipeline {
             steps {
                 sh """
                     mkdir -p frontend-temp
-                    cp -R $CUSTOMER_CODE_DIR/$CONFIG_DIR/React/ReactProjectTemplate/* frontend-temp/
+                    cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/React/ReactProjectTemplate/* frontend-temp/
                 """
             }
         }
@@ -52,8 +52,8 @@ pipeline {
             }
             steps {
                 script {
-                    def projectLower   = env.PROJECT_NAME.toLowerCase()
-                    def workspaceLower = env.WORKSPACE_NAME.toLowerCase()
+                    def projectLower   = env.PROJECT.toLowerCase()
+                    def workspaceLower = env.WORKSPACE.toLowerCase()
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
                     dir('frontend-temp') {
@@ -78,8 +78,8 @@ pipeline {
         stage('Build Backend Image') {
             steps {
                 script {
-                    def projectLower   = env.PROJECT_NAME.toLowerCase()
-                    def workspaceLower = env.WORKSPACE_NAME.toLowerCase()
+                    def projectLower   = env.PROJECT.toLowerCase()
+                    def workspaceLower = env.WORKSPACE.toLowerCase()
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
                     dir('backend-temp') {
@@ -97,8 +97,8 @@ pipeline {
         stage('Push Images to GCP Artifact Registry') {
             steps {
                 script {
-                    def projectLower   = env.PROJECT_NAME.toLowerCase()
-                    def workspaceLower = env.WORKSPACE_NAME.toLowerCase()
+                    def projectLower   = env.PROJECT.toLowerCase()
+                    def workspaceLower = env.WORKSPACE.toLowerCase()
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
                     def images = [
