@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        WORKSPACE      = '${WORKSPACE}'
-        PROJECT        = '${PROJECT}'
-        CONFIG_DIR     = '${CONFIG_DIR}'
-        NAMESPACE      = '${NAMESPACE}'
-        FRONTEND       = '${FRONTEND}'
-        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/${WORKSPACE}/${PROJECT}"
+        WORKSPACE      = '_WORKSPACE_'
+        PROJECT        = '_PROJECT_'
+        CONFIG_DIR     = '_CONFIG_DIR_'
+        NAMESPACE      = '_NAMESPACE_'
+        FRONTEND       = '_FRONTEND_'
+        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/_WORKSPACE_/_PROJECT_"
     }
 
     stages {
