@@ -16,11 +16,11 @@ pipeline {
                     def template = readFile 'templates/Jenkinsfile.template'
 
                     def result = template
-                        .replace('WORKSPACE', params.WORKSPACE)
-                        .replace('PROJECT', params.PROJECT)
-                        .replace('CONFIG_DIR', params.CONFIG_DIR)
-                        .replace('NAMESPACE', params.NAMESPACE)
-                        .replace('PROJECT_TYPE', params.PROJECT_TYPE)
+                        .replace('_WORKSPACE_', params.WORKSPACE)
+                        .replace('_PROJECT_', params.PROJECT)
+                        .replace('_CONFIG_DIR_', params.CONFIG_DIR)
+                        .replace('_NAMESPACE_', params.NAMESPACE)
+                        .replace('_PROJECT_TYPE_', params.PROJECT_TYPE)
 
                     writeFile file: 'Jenkinsfile-test', text: result
 
