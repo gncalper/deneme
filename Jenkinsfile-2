@@ -34,7 +34,6 @@ pipeline {
                 script {
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
-                    def configDir = params.CONFIG_DIR.toLowerCase()
 
                     def backendTpl = readFile 'templates/backend.yaml.template'
 
@@ -49,8 +48,8 @@ pipeline {
                         def frontendTpl = readFile 'templates/frontend.yaml.template'
 
                         def frontendValues = frontendTpl
-                            .replace('_WORKSPACE_', workspace)
-                            .replace('_PROJECT_', project)
+                            .replace('@WORKSPACE@', workspace)
+                            .replace('@PROJECT@', project)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
                         echo "Frontend values.yaml generated"
