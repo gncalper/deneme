@@ -5,9 +5,9 @@ pipeline {
         string(name: 'WORKSPACE')
         string(name: 'PROJECT')
         string(name: 'CONFIG_DIR')
-        string(name: 'NAMESPACE')
-        booleanParam(name: 'FRONTEND', defaultValue: true)
-    }
+        choice( name: 'NAMESPACE',choices: ['uat', 'prod'],description: 'Is your project for testing or production?')
+        choice( name: 'PROJECT_TYPE',choices: ['mobil', 'web'],description: 'Is your project for mobil or web?')
+        }
 
     stages {
         stage('Generate Jenkinsfile') {
@@ -16,11 +16,11 @@ pipeline {
                     def template = readFile 'templates/Jenkinsfile.template'
 
                     def result = template
-                        .replace('_WORKSPACE_', params.WORKSPACE)
-                        .replace('_PROJECT_', params.PROJECT)
-                        .replace('_CONFIG_DIR_', params.CONFIG_DIR)
-                        .replace('_NAMESPACE_', params.NAMESPACE)
-                        .replace('_FRONTEND_', params.FRONTEND.toString())
+                        .replace('WORKSPACE', params.WORKSPACE)
+                        .replace('PROJECT', params.PROJECT)
+                        .replace('CONFIG_DIR', params.CONFIG_DIR)
+                        .replace('NAMESPACE', params.NAMESPACE)
+                        .replace('PROJECT_TYPE', params.PROJECT_TYPE)
 
                     writeFile file: 'Jenkinsfile-test', text: result
 

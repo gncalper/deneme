@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        WORKSPACE      = '_WORKSPACE_'
-        PROJECT        = '_PROJECT_'
-        CONFIG_DIR     = '_CONFIG_DIR_'
-        NAMESPACE      = '_NAMESPACE_'
-        FRONTEND       = '_FRONTEND_'
-        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/_WORKSPACE_/_PROJECT_"
+        WORKSPACE      = 'WORKSPACE'
+        PROJECT        = 'PROJECT'
+        CONFIG_DIR     = 'CONFIG_DIR'
+        NAMESPACE      = 'WORKSPACE-NAMESPACE'
+        PROJECT_TYPE   = 'PROJECT_TYPE'
+        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/WORKSPACE/PROJECT"
     }
 
     stages {
@@ -36,7 +36,7 @@ pipeline {
 
         stage('Prepare Frontend Workspace') {
             when {
-                expression { env.FRONTEND == 'true' }
+                expression { env.PROJECT_TYPE == 'web' }
             }
             steps {
                 sh """
@@ -48,7 +48,7 @@ pipeline {
 
         stage('Build Frontend Image') {
             when {
-                expression { env.FRONTEND == 'true' }
+                expression { env.PROJECT_TYPE == 'web' }
             }
             steps {
                 script {
