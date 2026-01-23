@@ -20,7 +20,7 @@ pipeline {
                         .replace('_PROJECT_', params.PROJECT)
                         .replace('_CONFIG_DIR_', params.CONFIG_DIR)
                         .replace('_NAMESPACE_', params.NAMESPACE)
-                        .replace('_PROJECT_TYPE_', params.PROJECT_TYPE)
+                        .replace('_PROJECT-TYPE_', params.PROJECT_TYPE)
 
                     writeFile file: 'Jenkinsfile-test', text: result
 
