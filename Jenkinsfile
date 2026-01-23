@@ -10,6 +10,26 @@ pipeline {
         }
 
     stages {
+
+        stage('Validate Parameters') {
+            steps {
+                script {
+
+                    if (!params.WORKSPACE?.trim()) {
+                        error "WORKSPACE zorunludur ve boş olamaz"
+                    }
+
+                    if (!params.PROJECT?.trim()) {
+                        error "PROJECT zorunludur ve boş olamaz"
+                    }
+
+                    if (!params.CONFIG_DIR?.trim()) {
+                        error "CONFIG_DIR zorunludur ve boş olamaz"
+                    }
+                }
+            }
+        }
+
         stage('Generate Jenkinsfile') {
             steps {
                 script {
