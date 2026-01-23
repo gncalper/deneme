@@ -5,16 +5,15 @@ pipeline {
         string(name: 'WORKSPACE')
         string(name: 'PROJECT')
         string(name: 'CONFIG_DIR')
-        choice( name: 'NAMESPACE',choices: ['uat', 'prod'], description: 'Is your project for testing or production?')
-        choice( name: 'PROJECT_TYPE',choices: ['web', 'mobile','workflow'], description: 'Is your project for mobil, workflow or web?')
-        }
+        choice(name: 'NAMESPACE', choices: ['uat', 'prod'], description: 'Is your project for testing or production?')
+        choice(name: 'PROJECT_TYPE', choices: ['web', 'mobile', 'workflow'], description: 'Is your project for mobil, workflow or web?')
+    }
 
     stages {
 
         stage('Validate Parameters') {
             steps {
                 script {
-
                     if (!params.WORKSPACE?.trim()) {
                         error "WORKSPACE zorunludur ve boş olamaz"
                     }
@@ -26,12 +25,13 @@ pipeline {
                     if (!params.CONFIG_DIR?.trim()) {
                         error "CONFIG_DIR zorunludur ve boş olamaz"
                     }
-
+                }
+            }
+        }
 
         stage('Generate Helm Values') {
             steps {
                 script {
-
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
                     def configDir = params.CONFIG_DIR.toLowerCase()
@@ -39,36 +39,27 @@ pipeline {
                     def backendTpl = readFile 'templates/backend.yaml.template'
 
                     def backendValues = backendTpl
-                    .replace('@WORKSPACE@', workspace)
-                    .replace('@PROJECT@', project)
+                        .replace('@WORKSPACE@', workspace)
+                        .replace('@PROJECT@', project)
 
                     writeFile file: 'values-backend.yaml', text: backendValues
-
                     echo "Backend values.yaml generated"
 
                     if (params.PROJECT_TYPE == 'web') {
-
                         def frontendTpl = readFile 'templates/frontend.yaml.template'
 
                         def frontendValues = frontendTpl
-
-                        .replace('_WORKSPACE_', workspace)
-                        .replace('_PROJECT_', project)
+                            .replace('_WORKSPACE_', workspace)
+                            .replace('_PROJECT_', project)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
-
                         echo "Frontend values.yaml generated"
                     } else {
-                        echo "PROJECT_TYPE mobil → frontend values.yaml oluşturulmadı"
+                        echo "PROJECT_TYPE web değil → frontend values.yaml oluşturulmadı"
                     }
                 }
             }
         }
 
-
-
-                }
-            }
-        }
     }
 }
