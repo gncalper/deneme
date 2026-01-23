@@ -5,8 +5,8 @@ pipeline {
         string(name: 'WORKSPACE')
         string(name: 'PROJECT')
         string(name: 'CONFIG_DIR')
-        choice( name: 'NAMESPACE',choices: ['uat', 'prod'],description: 'Is your project for testing or production?')
-        choice( name: 'PROJECT_TYPE',choices: ['mobil', 'web'],description: 'Is your project for mobil or web?')
+        choice( name: 'NAMESPACE',choices: ['uat', 'prod'], defaultValue: 'uat', description: 'Is your project for testing or production?')
+        choice( name: 'PROJECT_TYPE',choices: ['mobil', 'web','workflow'], defaultValue: 'web', description: 'Is your project for mobil, workflow or web?')
         }
 
     stages {
