@@ -41,6 +41,7 @@ pipeline {
         stage('Generate Helm Values') {
             steps {
                 script {
+                    def httpPathValue = params.HTTP_PATH ? "true" : "false"
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
 
@@ -50,7 +51,7 @@ pipeline {
                         .replace('@WORKSPACE@', workspace)
                         .replace('@PROJECT@', project)
                         .replace('@NAMESPACE@', params.NAMESPACE)
-                        .replace('@HTTP_PATH@', params.HTTP_PATH)
+                        .replace('@HTTP_PATH@', httpPathValue)
                         .replace('@PATH@', params.PATH)
 
                     writeFile file: 'values-backend.yaml', text: backendValues
@@ -63,7 +64,7 @@ pipeline {
                             .replace('@WORKSPACE@', workspace)
                             .replace('@PROJECT@', project)
                             .replace('@NAMESPACE@', params.NAMESPACE)
-                            .replace('@HTTP_PATH@', params.HTTP_PATH)
+                            .replace('@HTTP_PATH@', httpPathValue)
                             .replace('@PATH@', params.PATH)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
