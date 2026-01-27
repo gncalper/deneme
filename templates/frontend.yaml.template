@@ -1,11 +1,11 @@
 appName: "@WORKSPACE@-@PROJECT@-uat-frontend"
 namespace: "@WORKSPACE@-uat"
 deploy:
-  imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-uat.kuika.com-frontend"
+  imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-frontend"
   tag: "1"
 labels:
   customer: "@WORKSPACE@"
-  env: "uat"
+  env: "@NAMESPACE@"
 replicaCount: 1
 nodeSelector:
   nodepool: kuika-cloud-uat

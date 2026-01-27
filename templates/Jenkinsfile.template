@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        WORKSPACE      = '_WORKSPACE_'
-        PROJECT        = '_PROJECT_'
-        CONFIG_DIR     = '_CONFIG_DIR_'
-        NAMESPACE      = '_WORKSPACE_-_NAMESPACE_'
-        PROJECT_TYPE   = '_PROJECT-TYPE_'
-        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/_WORKSPACE_/_PROJECT_"
+        WORKSPACE      = '@WORKSPACE@'
+        PROJECT        = '@PROJECT@'
+        CONFIG_DIR     = '@CONFIG_DIR@'
+        NAMESPACE      = '@WORKSPACE@-@NAMESPACE@'
+        PROJECT_TYPE   = '@PROJECT-TYPE@'
+        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/@WORKSPACE@/@PROJECT@"
     }
 
     stages {
