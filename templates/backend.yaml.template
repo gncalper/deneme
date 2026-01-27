@@ -75,7 +75,8 @@ httpRoute:
     name: kuika-uat-gateway
     namespace: kuika-uat
   hostnames:
-  - "abaliogluatlas-uatapi.kuika.com"
+  - "kinayuatapi.kuika.com"
+  path: "/ctodashboardapi/"
 resources:
   requests:
     cpu: "50m"
