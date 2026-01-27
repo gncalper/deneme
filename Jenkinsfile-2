@@ -28,10 +28,10 @@ pipeline {
                         error "CONFIG_DIR zorunludur ve boş olamaz"
                     }
 
-                    if (params.HTTP_PATH_ENABLED) {
+                    if (params.HTTP_PATH) {
 
                         if (!params.PATH?.trim()) {
-                            error "HTTP_PATH_ENABLED=true iken HTTP_PATH_VALUE zorunludur"
+                            error "HTTP_PATH=true iken HTTP_PATH_VALUE zorunludur"
                         }
                     }
                 }
