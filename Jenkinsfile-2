@@ -40,6 +40,7 @@ pipeline {
                     def backendValues = backendTpl
                         .replace('@WORKSPACE@', workspace)
                         .replace('@PROJECT@', project)
+                        .replace('@NAMESPACE@', params.NAMESPACE)
 
                     writeFile file: 'values-backend.yaml', text: backendValues
                     echo "Backend values.yaml generated"
@@ -50,6 +51,7 @@ pipeline {
                         def frontendValues = frontendTpl
                             .replace('@WORKSPACE@', workspace)
                             .replace('@PROJECT@', project)
+                            .replace('@NAMESPACE@', params.NAMESPACE)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
                         echo "Frontend values.yaml generated"
