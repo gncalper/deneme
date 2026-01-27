@@ -7,6 +7,8 @@ pipeline {
         string(name: 'CONFIG_DIR')
         choice( name: 'NAMESPACE',choices: ['uat', 'prod'], description: 'Is your project for testing or production?')
         choice( name: 'PROJECT_TYPE',choices: ['web', 'mobile','workflow'], description: 'Is your project for mobil, workflow or web?')
+        booleanParam(name: 'HTTP_PATH',defaultValue: false,description: 'Route path kullanılacak mı?')
+        string(name: 'PATH', defaultValue: '', description: 'Path (enabled ise zorunlu)' )
         }
 
     stages {
@@ -25,6 +27,13 @@ pipeline {
                     if (!params.CONFIG_DIR?.trim()) {
                         error "CONFIG_DIR zorunludur ve boş olamaz"
                     }
+
+                    if (params.HTTP_PATH_ENABLED) {
+
+                        if (!params.PATH?.trim()) {
+                            error "HTTP_PATH_ENABLED=true iken HTTP_PATH_VALUE zorunludur"
+                        }
+                    }
                 }
             }
         }
@@ -41,6 +50,8 @@ pipeline {
                         .replace('@WORKSPACE@', workspace)
                         .replace('@PROJECT@', project)
                         .replace('@NAMESPACE@', params.NAMESPACE)
+                        .replace('@HTTP_PATH@', params.HTTP_PATH)
+                        .replace('@PATH@', params.PATH)
 
                     writeFile file: 'values-backend.yaml', text: backendValues
                     echo "Backend values.yaml generated"
@@ -52,6 +63,8 @@ pipeline {
                             .replace('@WORKSPACE@', workspace)
                             .replace('@PROJECT@', project)
                             .replace('@NAMESPACE@', params.NAMESPACE)
+                            .replace('@HTTP_PATH@', params.HTTP_PATH)
+                            .replace('@PATH@', params.PATH)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
                         echo "Frontend values.yaml generated"

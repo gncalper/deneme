@@ -67,6 +67,9 @@ httpRoute:
     namespace: kuika-uat
   hostnames:
   - "abaliogluatlas-uat.kuika.com"
+  path:
+    enabled: @HTTP_PATH@
+    value: "/@PATH@/"
 resources:
   requests:
     cpu: "20m"

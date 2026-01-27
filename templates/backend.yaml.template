@@ -76,7 +76,9 @@ httpRoute:
     namespace: kuika-uat
   hostnames:
   - "kinayuatapi.kuika.com"
-  path: "/ctodashboardapi/"
+  path:
+    enabled: @HTTP_PATH@
+    value: "/@PATH@/"
 resources:
   requests:
     cpu: "50m"
