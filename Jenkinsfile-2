@@ -31,7 +31,7 @@ pipeline {
                     if (params.HTTP_PATH) {
 
                         if (!params.PATH?.trim()) {
-                            error "HTTP_PATH=true iken HTTP_PATH_VALUE zorunludur"
+                            error "HTTP_PATH checkbox işaretli iken PATH zorunludur"
                         }
                     }
                 }
