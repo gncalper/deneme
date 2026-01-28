@@ -70,7 +70,6 @@ pipeline {
                         .replace('@NAMESPACE@', params.NAMESPACE)
                         .replace('@HOST_PATH@', httpPathValue)
                         .replace('@BACKEND_TYPE@', backendType)
-                        .replace('@PATH@', params.PATH)
                         .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
                         .replace('@BACKEND_PATH@', params.BACKEND_PATH)
 
@@ -94,7 +93,6 @@ pipeline {
                             .replace('@PROJECT@', project)
                             .replace('@NAMESPACE@', params.NAMESPACE)
                             .replace('@HOST_PATH@', httpPathValue)
-                            .replace('@PATH@', params.PATH)
                             .replace('@FRONTEND_HOSTNAME@', params.FRONTEND_HOSTNAME)
                             .replace('@FRONTEND_PATH@', params.FRONTEND_PATH)
                             .replace('@ENV_FROM_SECRET@', frontendEnvFromSecret)
