@@ -45,8 +45,8 @@ pipeline {
                         error "HOST_PATH açıkken BACKEND_PATH zorunludur"
                     }
 
-                    if (params.PROJECT_TYPE == 'web' && params.HOST_PATH && !params.FRONTEND_PATH?.trim()) {
-                        error "HOST_PATH açıkken FRONTEND_PATH zorunludur"
+                    if (params.HOST_PATH && params.PROJECT_TYPE == 'web' && !params.FRONTEND_PATH?.trim()) {
+                        error "HOST_PATH açıkken FRONTEND_PATH zorunludur (web projeler için)"
                     }
 
                 }
