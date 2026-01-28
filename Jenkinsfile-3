@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Generate config.json') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'db-user', variable: 'DB_USER'),
+                    string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
+                ]) {
+                    sh '''
+                    envsubst < config.template.json > config.json
+                    '''
+                }
+            }
+        }
+    }
+}
