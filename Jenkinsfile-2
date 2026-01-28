@@ -9,9 +9,9 @@ pipeline {
         choice( name: 'PROJECT_TYPE',choices: ['web', 'mobile','workflow'], description: 'Is your project for mobil, workflow or web?')
         booleanParam(name: 'HOST_PATH',defaultValue: false,description: 'Host path kullanılacak mı?')
         string(name: 'BACKEND_HOSTNAME', description: 'Uygulamanın backend veya workflow url ini girin')
-        string(name: 'BACKEND_PATH', defaultValue: '', description: 'Path (Uygulamanın backend pathi var ise değer giriniz yoksa boş bırakınız)' )
+        string(name: 'BACKEND_PATH', defaultValue: '', description: 'Path (Host path checkbox işaretli ise uygulamanın backend pathi var ise değer giriniz yoksa boş bırakınız)' )
         string(name: 'FRONTEND_HOSTNAME', description: 'Uygulamanın frontend url ini girin')
-        string(name: 'FRONTEND_PATH', defaultValue: '', description: 'Path (Uygulamanın frontend pathi var ise değer giriniz yoksa boş bırakınız)' )
+        string(name: 'FRONTEND_PATH', defaultValue: '', description: 'Path (Host path checkbox işaretli ise uygulamanın frontend pathi var ise değer giriniz yoksa boş bırakınız)' )
         }
 
     stages {
