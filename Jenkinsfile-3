@@ -9,7 +9,7 @@ pipeline {
                     string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
                 ]) {
                     sh '''
-                    envsubst < config.template.json > config.json
+                    envsubst < cred.json > config.json
                     '''
                 }
             }
