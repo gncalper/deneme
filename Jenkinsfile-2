@@ -42,15 +42,15 @@ pipeline {
                     }
 
                     if (!params.HOST_PATH && (params.BACKEND_PATH?.trim() || params.FRONTEND_PATH?.trim())) {
-                        error "HOST_PATH kapalıyken BACKEND_PATH / FRONTEND_PATH girilmemelidir"
+                        error "HOST_PATH checkbox işaretliyken BACKEND_PATH / FRONTEND_PATH girilmemelidir"
                     }
 
                     if (params.HOST_PATH && !params.BACKEND_PATH?.trim()) {
-                        error "HOST_PATH açıkken BACKEND_PATH zorunludur"
+                        error "HOST_PATH checkbox işaretliyken BACKEND_PATH zorunludur"
                     }
 
                     if (params.HOST_PATH && params.PROJECT_TYPE == 'web' && !params.FRONTEND_PATH?.trim()) {
-                        error "HOST_PATH açıkken FRONTEND_PATH zorunludur (web projeler için)"
+                        error "HOST_PATH checkbox işaretliyken FRONTEND_PATH zorunludur (web projeler için)"
                     }
 
                 }
