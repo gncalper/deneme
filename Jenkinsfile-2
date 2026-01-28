@@ -10,7 +10,7 @@ pipeline {
         string(name: 'FRONTEND_HOSTNAME', description: 'Uygulamanın frontend url ini girin')
         string(name: 'BACKEND_HOSTNAME', description: 'Uygulamanın backend veya workflow url ini girin')
         booleanParam(name: 'HOST_PATH',defaultValue: false,description: 'Host path kullanılacak mı?')
-        string(name: 'PATH', defaultValue: '', description: 'Path (enabled ise zorunlu)' )
+        string(name: 'PATH', defaultValue: '', description: 'Path (Uygulamanın pathi var ise değer giriniz yoksa boş bırakınız)' )
         }
 
     stages {
