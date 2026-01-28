@@ -68,7 +68,7 @@ httpRoute:
   hostnames:
   - "@FRONTEND_HOSTNAME@"
   path:
-    enabled: @HTTP_PATH@
+    enabled: @HOST_PATH@
     value: "/@FRONTEND_PATH@/"
 resources:
   requests:
