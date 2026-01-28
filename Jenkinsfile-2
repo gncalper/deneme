@@ -56,6 +56,11 @@ pipeline {
                     def httpPathValue = params.HTTP_PATH ? "true" : "false"
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
+                    def backendType = "backend"
+
+                    if (params.PROJECT_TYPE == 'workflow') {
+                        backendType = "workflow"
+                    }
 
                     def backendTpl = readFile 'templates/backend.yaml.template'
 
@@ -64,6 +69,7 @@ pipeline {
                         .replace('@PROJECT@', project)
                         .replace('@NAMESPACE@', params.NAMESPACE)
                         .replace('@HTTP_PATH@', httpPathValue)
+                        .replace('@BACKEND_TYPE@', backendType)
                         .replace('@PATH@', params.PATH)
                         .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
                         .replace('@BACKEND_PATH@', params.BACKEND_PATH)

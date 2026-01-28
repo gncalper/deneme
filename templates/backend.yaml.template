@@ -1,7 +1,7 @@
 appName: "@WORKSPACE@-@PROJECT@-uat-backend"
 namespace: "@WORKSPACE@-uat"
 deploy:
-  imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-backend"
+  imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-@BACKEND_TYPE@"
   tag: "1"
 labels:
   customer: "@WORKSPACE@"
