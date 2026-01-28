@@ -53,7 +53,7 @@ pipeline {
         stage('Generate Helm Values') {
             steps {
                 script {
-                    def httpPathValue = params.HTTP_PATH ? "true" : "false"
+                    def httpPathValue = params.HOST_PATH ? "true" : "false"
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
                     def backendType = "backend"
