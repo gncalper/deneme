@@ -7,7 +7,9 @@ pipeline {
         string(name: 'CONFIG_DIR')
         choice( name: 'NAMESPACE',choices: ['uat', 'prod'], description: 'Is your project for testing or production?')
         choice( name: 'PROJECT_TYPE',choices: ['web', 'mobile','workflow'], description: 'Is your project for mobil, workflow or web?')
-        booleanParam(name: 'HTTP_PATH',defaultValue: false,description: 'Route path kullanılacak mı?')
+        string(name: 'FRONTEND_HOSTNAME', description: 'Uygulamanın frontend url'ini girin')
+        string(name: 'BACKEND_HOSTNAME', description: 'Uygulamanın backend veya workflow url'ini girin')
+        booleanParam(name: 'HOST_PATH',defaultValue: false,description: 'Host path kullanılacak mı?')
         string(name: 'PATH', defaultValue: '', description: 'Path (enabled ise zorunlu)' )
         }
 
@@ -28,10 +30,19 @@ pipeline {
                         error "CONFIG_DIR zorunludur ve boş olamaz"
                     }
 
-                    if (params.HTTP_PATH) {
+                    if (!params.BACKEND_HOSTNAME?.trim()) {
+                        error "BACKEND_HOSTNAME zorunludur ve boş olamaz"
+                    }
 
+                    if (params.PROJECT_TYPE == 'web') {
+                        if (!params.FRONTEND_HOSTNAME?.trim()) {
+                            error "PROJECT_TYPE=web iken FRONTEND_HOSTNAME zorunludur"
+                        }
+                    }
+
+                    if (params.HTTP_PATH) {
                         if (!params.PATH?.trim()) {
-                            error "HTTP_PATH checkbox işaretli iken PATH zorunludur"
+                            error "HOST_PATH checkbox işaretli iken PATH zorunludur"
                         }
                     }
                 }
@@ -53,11 +64,21 @@ pipeline {
                         .replace('@NAMESPACE@', params.NAMESPACE)
                         .replace('@HTTP_PATH@', httpPathValue)
                         .replace('@PATH@', params.PATH)
+                        .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
 
                     writeFile file: 'values-backend.yaml', text: backendValues
                     echo "Backend values.yaml generated"
 
                     if (params.PROJECT_TYPE == 'web') {
+
+                        def frontendEnvFromSecret = "false"
+                        def frontendExternalSecret = "false"
+
+                        if (params.NAMESPACE == 'prod') {
+                            frontendEnvFromSecret = "true"
+                            frontendExternalSecret = "true"
+                        }
+
                         def frontendTpl = readFile 'templates/frontend.yaml.template'
 
                         def frontendValues = frontendTpl
@@ -66,6 +87,9 @@ pipeline {
                             .replace('@NAMESPACE@', params.NAMESPACE)
                             .replace('@HTTP_PATH@', httpPathValue)
                             .replace('@PATH@', params.PATH)
+                            .replace('@FRONTEND_HOSTNAME@', params.FRONTEND_HOSTNAME)
+                            .replace('@ENV_FROM_SECRET@', frontendEnvFromSecret)
+                            .replace('@EXTERNAL_SECRET_ENABLED@', frontendExternalSecret)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
                         echo "Frontend values.yaml generated"

@@ -75,9 +75,9 @@ httpRoute:
     name: kuika-uat-gateway
     namespace: kuika-uat
   hostnames:
-  - "kinayuatapi.kuika.com"
+  - "@BACKEND_HOSTNAME@"
   path:
-    enabled: @HTTP_PATH@
+    enabled: @HOST_PATH@
     value: "/@PATH@/"
 resources:
   requests:
