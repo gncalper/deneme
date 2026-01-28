@@ -41,11 +41,14 @@ pipeline {
                         }
                     }
 
-                    if (params.HOST_PATH) {
-                        if (!params.PATH?.trim()) {
-                            error "HOST_PATH checkbox işaretli iken PATH zorunludur"
-                        }
+                    if (params.HOST_PATH && !params.BACKEND_PATH?.trim()) {
+                        error "HOST_PATH açıkken BACKEND_PATH zorunludur"
                     }
+
+                    if (params.PROJECT_TYPE == 'web' && params.HOST_PATH && !params.FRONTEND_PATH?.trim()) {
+                        error "HOST_PATH açıkken FRONTEND_PATH zorunludur"
+                    }
+
                 }
             }
         }
