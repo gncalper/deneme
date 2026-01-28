@@ -78,7 +78,7 @@ httpRoute:
   - "@BACKEND_HOSTNAME@"
   path:
     enabled: @HOST_PATH@
-    value: "/@PATH@/"
+    value: "/@BACKEND_PATH@/"
 resources:
   requests:
     cpu: "50m"

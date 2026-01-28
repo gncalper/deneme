@@ -7,10 +7,11 @@ pipeline {
         string(name: 'CONFIG_DIR')
         choice( name: 'NAMESPACE',choices: ['uat', 'prod'], description: 'Is your project for testing or production?')
         choice( name: 'PROJECT_TYPE',choices: ['web', 'mobile','workflow'], description: 'Is your project for mobil, workflow or web?')
-        string(name: 'FRONTEND_HOSTNAME', description: 'Uygulamanın frontend url ini girin')
-        string(name: 'BACKEND_HOSTNAME', description: 'Uygulamanın backend veya workflow url ini girin')
         booleanParam(name: 'HOST_PATH',defaultValue: false,description: 'Host path kullanılacak mı?')
-        string(name: 'PATH', defaultValue: '', description: 'Path (Uygulamanın pathi var ise değer giriniz yoksa boş bırakınız)' )
+        string(name: 'BACKEND_HOSTNAME', description: 'Uygulamanın backend veya workflow url ini girin')
+        string(name: 'BACKEND_PATH', defaultValue: '', description: 'Path (Uygulamanın backend pathi var ise değer giriniz yoksa boş bırakınız)' )
+        string(name: 'FRONTEND_HOSTNAME', description: 'Uygulamanın frontend url ini girin')
+        string(name: 'FRONTEND_PATH', defaultValue: '', description: 'Path (Uygulamanın frontend pathi var ise değer giriniz yoksa boş bırakınız)' )
         }
 
     stages {
@@ -40,7 +41,7 @@ pipeline {
                         }
                     }
 
-                    if (params.HTTP_PATH) {
+                    if (params.HOST_PATH) {
                         if (!params.PATH?.trim()) {
                             error "HOST_PATH checkbox işaretli iken PATH zorunludur"
                         }
@@ -65,6 +66,7 @@ pipeline {
                         .replace('@HTTP_PATH@', httpPathValue)
                         .replace('@PATH@', params.PATH)
                         .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
+                        .replace('@BACKEND_PATH@', params.BACKEND_PATH)
 
                     writeFile file: 'values-backend.yaml', text: backendValues
                     echo "Backend values.yaml generated"
@@ -88,6 +90,7 @@ pipeline {
                             .replace('@HTTP_PATH@', httpPathValue)
                             .replace('@PATH@', params.PATH)
                             .replace('@FRONTEND_HOSTNAME@', params.FRONTEND_HOSTNAME)
+                            .replace('@FRONTEND_PATH@', params.FRONTEND_PATH)
                             .replace('@ENV_FROM_SECRET@', frontendEnvFromSecret)
                             .replace('@EXTERNAL_SECRET_ENABLED@', frontendExternalSecret)
 
