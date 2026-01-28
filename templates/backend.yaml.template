@@ -39,7 +39,7 @@ externalSecret:
   secretStoreRef:
     name: gcp-store
     kind: ClusterSecretStore
-  key: AbaliogluTurnkey-Atlas-backend-secret-test
+  key: @WORKSPACE@-@PROJECT@-@BACKEND_TYPE@-secret-@NAMESPACE@
 pvc:
   enabled: false
   storageClassName: "standard-rwo"
