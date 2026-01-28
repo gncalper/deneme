@@ -41,6 +41,10 @@ pipeline {
                         }
                     }
 
+                    if (!params.HOST_PATH && (params.BACKEND_PATH?.trim() || params.FRONTEND_PATH?.trim())) {
+                        error "HOST_PATH kapalıyken BACKEND_PATH / FRONTEND_PATH girilmemelidir"
+                    }
+
                     if (params.HOST_PATH && !params.BACKEND_PATH?.trim()) {
                         error "HOST_PATH açıkken BACKEND_PATH zorunludur"
                     }
