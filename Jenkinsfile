@@ -33,7 +33,7 @@ pipeline {
         stage('Generate Jenkinsfile') {
             steps {
                 script {
-                    def template = readFile 'templates/Jenkinsfile.template'
+                    def template = readFile 'templates/Jenkinsfile.tpl'
 
                     def result = template
                         .replace('@WORKSPACE@', params.WORKSPACE)

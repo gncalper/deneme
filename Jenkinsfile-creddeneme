@@ -4,12 +4,12 @@ pipeline {
     parameters {
         string(name: 'WORKSPACE', description: 'Workspace name')
         string(name: 'PROJECT', description: 'Project name')
-        choice(name: 'PROJECT_TYPE', choices: ['web', 'mobile', 'workflow'], description: 'Project type')
-        choice(name: 'NAMESPACE', choices: ['uat', 'prod'], description: 'Environment')
+        choice(name: 'PROJECT_TYPE', choices: ['web', 'mobile', 'workflow'])
+        choice(name: 'NAMESPACE', choices: ['uat', 'prod'])
     }
 
     stages {
-        stage('Create GCP Secrets') {
+        stage('DRY-RUN Secret Plan') {
             steps {
                 withCredentials([
                     string(credentialsId: 'db-user', variable: 'DB_USER'),
@@ -18,13 +18,16 @@ pipeline {
                     sh '''
                     set -e
 
-                    echo " WORKSPACE    : $WORKSPACE"
-                    echo " PROJECT      : $PROJECT"
-                    echo " PROJECT_TYPE : $PROJECT_TYPE"
-                    echo " NAMESPACE    : $NAMESPACE"
+                    echo ""
+                    echo "========== DRY RUN =========="
+                    echo "WORKSPACE    : $WORKSPACE"
+                    echo "PROJECT      : $PROJECT"
+                    echo "PROJECT_TYPE : $PROJECT_TYPE"
+                    echo "NAMESPACE    : $NAMESPACE"
                     echo "=============================="
 
-                    # 1️⃣ HANGİ COMPONENT’LER OLUŞACAK?
+                    # -------------------------------------------------
+                    # 1️⃣ COMPONENT KARARI
                     # -------------------------------------------------
                     case "$PROJECT_TYPE:$NAMESPACE" in
                       web:prod)
@@ -40,55 +43,50 @@ pipeline {
                         COMPONENTS="mobile"
                         ;;
                       *)
-                        echo "❌ Unsupported PROJECT_TYPE / NAMESPACE combination"
+                        echo "❌ Unsupported combination"
                         exit 1
                         ;;
                     esac
 
-                    echo "Components to create: $COMPONENTS"
+                    echo ""
+                    echo "Components to be created:"
+                    echo "➡️ $COMPONENTS"
+                    echo ""
 
                     # -------------------------------------------------
-                    # 2️⃣ COMPONENT LOOP
+                    # 2️⃣ LOOP (NO GCP CALLS)
                     # -------------------------------------------------
                     for COMPONENT in $COMPONENTS; do
                         SECRET_NAME="${WORKSPACE}-${PROJECT}-${COMPONENT}-secret-${NAMESPACE}"
                         TEMPLATE="cred-templates/${COMPONENT}-${NAMESPACE}.json.tpl"
-                        OUTPUT_FILE="secret-${COMPONENT}.json"
+                        OUTPUT="preview-${COMPONENT}.json"
 
                         echo "----------------------------------------"
                         echo "Component   : $COMPONENT"
                         echo "Secret Name : $SECRET_NAME"
                         echo "Template    : $TEMPLATE"
-                        echo "----------------------------------------"
 
-                        # Secret varsa hata ver
-                        if gcloud secrets describe "$SECRET_NAME" >/dev/null 2>&1; then
-                            echo "❌ Secret already exists: $SECRET_NAME"
-                            exit 1
-                        fi
-
-                        # Template yoksa hata ver
                         if [ ! -f "$TEMPLATE" ]; then
-                            echo "❌ Template file not found: $TEMPLATE"
+                            echo "❌ Template NOT FOUND"
                             exit 1
                         fi
 
-                        # JSON oluştur (sed ile)
                         sed \
                           -e "s|\\\${DB_USER}|$DB_USER|g" \
                           -e "s|\\\${DB_PASSWORD}|$DB_PASSWORD|g" \
-                          "$TEMPLATE" > "$OUTPUT_FILE"
+                          "$TEMPLATE" > "$OUTPUT"
 
-                        # Secret oluştur
-                        gcloud secrets create "$SECRET_NAME" \
-                          --replication-policy=automatic
-
-                        # Secret version ekle
-                        gcloud secrets versions add "$SECRET_NAME" \
-                          --data-file="$OUTPUT_FILE"
-
-                        echo "✅ Secret created successfully: $SECRET_NAME"
+                        echo ""
+                        echo "🔍 Generated JSON Preview:"
+                        echo "----------------------------------------"
+                        cat "$OUTPUT"
+                        echo "----------------------------------------"
+                        echo ""
+                        echo "🚫 GCP Secret creation SKIPPED (DRY RUN)"
+                        echo ""
                     done
+
+                    echo "✅ DRY RUN completed successfully"
                     '''
                 }
             }
