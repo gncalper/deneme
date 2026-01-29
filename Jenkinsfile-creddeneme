@@ -6,6 +6,8 @@ pipeline {
         string(name: 'PROJECT', description: 'Project name')
         choice(name: 'PROJECT_TYPE', choices: ['web', 'mobile', 'workflow'])
         choice(name: 'NAMESPACE', choices: ['uat', 'prod'])
+        string(name: 'BACKEND_HOSTNAME', description: 'Host name giriniz')
+        string(name: 'BACKEND_PATH', description: 'Path var ise giriniz')
     }
 
     stages {

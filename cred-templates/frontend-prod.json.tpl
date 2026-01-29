@@ -1,3 +1,3 @@
 {
-  "BACKEND_URL": "https://apiportal.aydin.com/v1/api"
+  "BACKEND_URL": "https://${BACKEND_HOSTNAME}/v1/api"
 }
