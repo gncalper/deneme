@@ -8,6 +8,7 @@ pipeline {
         choice(name: 'NAMESPACE', choices: ['uat', 'prod'])
         string(name: 'BACKEND_HOSTNAME', description: 'Host name giriniz')
         string(name: 'BACKEND_PATH', description: 'Path var ise giriniz')
+        string(name: 'DB_NAME', description: 'Db name giriniz')
     }
 
     stages {
