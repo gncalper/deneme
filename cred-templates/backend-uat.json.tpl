@@ -1,3 +1,3 @@
 {
-  "CONNECTION_STRING": "Server=db.kuika.com;Database=kuicka_aydingroup_test_db;User Id=${DB_USER};Password=${DB_PASSWORD}"
+  "CONNECTION_STRING": "Server=db.kuika.com;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD}"
 }

@@ -79,6 +79,7 @@ pipeline {
                           -e "s|\\\${DB_PASSWORD}|$DB_PASSWORD|g" \
                           -e "s|\\\${BACKEND_HOSTNAME}|$BACKEND_HOSTNAME|g" \
                           -e "s|\\\${BACKEND_PATH}|$BACKEND_PATH|g" \
+                          -e "s|\\\${DB_NAME}|$DB_NAME|g" \
                           "$TEMPLATE" > "$OUTPUT"
 
                         echo ""
