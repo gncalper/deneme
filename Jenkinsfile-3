@@ -1,37 +1,41 @@
 pipeline {
     agent any
 
-stage('Create GCP Secret') {
-    steps {
-        withCredentials([
-            string(credentialsId: 'db-user', variable: 'DB_USER'),
-            string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
-        ]) {
-            sh '''
-            set -e
+        parameters {
+            string(name: 'WORKSPACE')
+            string(name: 'PROJECT')
+            }
+    stage('Create GCP Secret') {
+        steps {
+            withCredentials([
+                string(credentialsId: 'db-user', variable: 'DB_USER'),
+                string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
+            ]) {
+                sh '''
+                set -e
 
-            SECRET_NAME="${WORKSPACE}-${PROJECT}-${BACKEND_TYPE}-secret-${NAMESPACE}"
+                SECRET_NAME="${WORKSPACE}-${PROJECT}-${BACKEND_TYPE}-secret-${NAMESPACE}"
 
-            echo "Secret name: $SECRET_NAME"
+                echo "Secret name: $SECRET_NAME"
 
-            if gcloud secrets describe "$SECRET_NAME" >/dev/null 2>&1; then
-                echo "Secret already exists: $SECRET_NAME"
-                exit 1
-            fi
+                if gcloud secrets describe "$SECRET_NAME" >/dev/null 2>&1; then
+                    echo "Secret already exists: $SECRET_NAME"
+                    exit 1
+                fi
 
-            sed -e "s|\\${DB_USER}|$DB_USER|g" \
-                -e "s|\\${DB_PASSWORD}|$DB_PASSWORD|g" \
-                config.template.json > config.json
+                sed -e "s|\\${DB_USER}|$DB_USER|g" \
+                    -e "s|\\${DB_PASSWORD}|$DB_PASSWORD|g" \
+                    config.template.json > config.json
 
-            gcloud secrets create "$SECRET_NAME" \
-              --replication-policy="automatic"
+                gcloud secrets create "$SECRET_NAME" \
+                  --replication-policy="automatic"
 
-            gcloud secrets versions add "$SECRET_NAME" \
-              --data-file=config.json
+                gcloud secrets versions add "$SECRET_NAME" \
+                  --data-file=config.json
 
-            echo "Secret created successfully: $SECRET_NAME"
-            '''
+                echo "Secret created successfully: $SECRET_NAME"
+                '''
+            }
         }
     }
-  }
 }
