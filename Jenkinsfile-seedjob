@@ -9,17 +9,18 @@ pipeline {
 
     stages {
         stage('Folder Check') {
-            steps {
-                script {
-                    import jenkins.model.Jenkins
+                steps {
+                    script {
+                        def path = "${params.WORKSPACE}/${params.NAMESPACE}/${params.PROJECT}"
 
-                    def path = "${params.WORKSPACE}/${params.NAMESPACE}/${params.PROJECT}"
+                        def jenkins = jenkins.model.Jenkins.instance
 
-                    if (Jenkins.instance.getItemByFullName(path)) {
-                        error "❌ Folder zaten var: ${path}"
+                        if (jenkins.getItemByFullName(path)) {
+                            error "❌ Folder zaten var: ${path}"
+                        }
+
+                        echo "✅ Folder yok, devam edilebilir"
                     }
-
-                    echo "✅ Folder yok, DSL çalıştırılabilir"
                 }
             }
         }
