@@ -28,7 +28,7 @@ pipeline {
         stage('Run Job DSL') {
             steps {
                 jobDsl(
-                    targets: 'job-dsl/create-project.groovy',
+                    targets: 'job-dsl/create_project.groovy',
                     additionalParameters: [
                         WORKSPACE: params.WORKSPACE,
                         PROJECT  : params.PROJECT,
