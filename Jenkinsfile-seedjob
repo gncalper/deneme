@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'WORKSPACE', description: 'Workspace adı')
+        string(name: 'PROJECT', description: 'Project adı')
+        choice(name: 'NAMESPACE', choices: ['uat', 'prod'], description: 'Ortam')
+    }
+
+    stages {
+        stage('Folder Check') {
+            steps {
+                script {
+                    import jenkins.model.Jenkins
+
+                    def path = "${params.WORKSPACE}/${params.NAMESPACE}/${params.PROJECT}"
+
+                    if (Jenkins.instance.getItemByFullName(path)) {
+                        error "❌ Folder zaten var: ${path}"
+                    }
+
+                    echo "✅ Folder yok, DSL çalıştırılabilir"
+                }
+            }
+        }
+
+        stage('Run Job DSL') {
+            steps {
+                jobDsl(
+                    targets: 'job-dsl/create-project.groovy',
+                    additionalParameters: [
+                        WORKSPACE: params.WORKSPACE,
+                        PROJECT  : params.PROJECT,
+                        NAMESPACE: params.NAMESPACE
+                    ]
+                )
+            }
+        }
+    }
+}
