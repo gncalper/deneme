@@ -4,18 +4,18 @@ def namespace = NAMESPACE
 
 def basePath = "${workspace}/${project}/${namespace}"
 
-// Workspace folder
+// 1️⃣ Workspace
 folder(workspace)
 
-// Namespace folder
-folder("${workspace}/${namespace}")
+// 2️⃣ Project
+folder("${workspace}/${project}")
 
-// Eğer  folder varsa Job DSL otomatik fail eder
+// 3️⃣ Namespace
 folder(basePath) {
     description("Namespace: ${namespace}")
 }
 
-// Pipeline job
+// 4️⃣ Pipeline job
 pipelineJob("${basePath}/deploy") {
     definition {
         cpsScm {
