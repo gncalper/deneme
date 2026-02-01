@@ -25,7 +25,6 @@ pipeline {
             steps {
                 jobDsl(
                     targets: 'job-dsl/create_noneapproval.groovy',
-                    ignoreExisting: false,
                     additionalParameters: [
                         WORKSPACE: params.WORKSPACE,
                         PROJECT  : params.PROJECT,
