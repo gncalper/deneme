@@ -71,7 +71,7 @@ pipeline {
 
                         git add ${env.TARGET_DIR}/Jenkinsfile
                         git commit -m "Add Jenkinsfile for ${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
-                        git push origin main
+                        git push origin master
                     """
                 }
             }
