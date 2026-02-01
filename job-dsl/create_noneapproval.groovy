@@ -2,20 +2,25 @@ def workspace = WORKSPACE   // alper
 def project   = PROJECT     // genc
 def namespace = NAMESPACE   // uat
 
-def basePath = "Kuika/Customer-Projects/${workspace}/${project}/${namespace}"
+def rootPath  = "Kuika/Customer-Projects"
+def basePath  = "${rootPath}/${workspace}/${project}/${namespace}"
 
-// 1️⃣ alper
-folder(workspace)
+// 0️⃣ Root (mevcutsa sorun yok)
+folder("Kuika")
+folder(rootPath)
 
-// 2️⃣ alper/genc
-folder("${workspace}/${project}")
+// 1️⃣ Kuika/Customer-Projects/alper
+folder("${rootPath}/${workspace}")
 
-// 3️⃣ alper/genc/uat
+// 2️⃣ Kuika/Customer-Projects/alper/genc
+folder("${rootPath}/${workspace}/${project}")
+
+// 3️⃣ Kuika/Customer-Projects/alper/genc/uat
 folder(basePath) {
     description("Namespace: ${namespace}")
 }
 
-// 4️⃣ alper/genc/uat/deploy
+// 4️⃣ Job
 pipelineJob("${basePath}/deploy") {
     definition {
         cpsScm {
