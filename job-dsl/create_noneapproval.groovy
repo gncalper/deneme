@@ -1,21 +1,21 @@
-def workspace = WORKSPACE
-def project   = PROJECT
-def namespace = NAMESPACE
+def workspace = WORKSPACE   // alper
+def project   = PROJECT     // genc
+def namespace = NAMESPACE   // uat
 
 def basePath = "${workspace}/${project}/${namespace}"
 
-// 1️⃣ Workspace
+// 1️⃣ alper
 folder(workspace)
 
-// 2️⃣ Project
+// 2️⃣ alper/genc
 folder("${workspace}/${project}")
 
-// 3️⃣ Namespace
+// 3️⃣ alper/genc/uat
 folder(basePath) {
     description("Namespace: ${namespace}")
 }
 
-// 4️⃣ Pipeline job
+// 4️⃣ alper/genc/uat/deploy
 pipelineJob("${basePath}/deploy") {
     definition {
         cpsScm {
