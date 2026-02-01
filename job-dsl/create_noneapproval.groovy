@@ -2,7 +2,7 @@ def workspace = WORKSPACE
 def project   = PROJECT
 def namespace = NAMESPACE
 
-def basePath = "${workspace}/${namespace}/${project}"
+def basePath = "${workspace}/${project}/${namespace}"
 
 // Workspace folder
 folder(workspace)
@@ -10,9 +10,9 @@ folder(workspace)
 // Namespace folder
 folder("${workspace}/${namespace}")
 
-// Eğer project folder varsa Job DSL otomatik fail eder
+// Eğer  folder varsa Job DSL otomatik fail eder
 folder(basePath) {
-    description("Project: ${project}")
+    description("Namespace: ${namespace}")
 }
 
 // Pipeline job
