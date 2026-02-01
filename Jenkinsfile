@@ -66,6 +66,7 @@ pipeline {
             steps {
                 script {
                     sh """
+                        git checkout master
                         mkdir -p ${env.TARGET_DIR}
                         mv Jenkinsfile ${env.TARGET_DIR}/Jenkinsfile
 
