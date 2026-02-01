@@ -2,7 +2,7 @@ def workspace = WORKSPACE   // alper
 def project   = PROJECT     // genc
 def namespace = NAMESPACE   // uat
 
-def basePath = "${workspace}/${project}/${namespace}"
+def basePath = "Kuika/Customer-Projects/${workspace}/${project}/${namespace}"
 
 // 1️⃣ alper
 folder(workspace)
