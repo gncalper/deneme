@@ -4,17 +4,31 @@ pipeline {
     parameters {
         string(name: 'WORKSPACE', description: 'Workspace name')
         string(name: 'PROJECT', description: 'Project name')
-        choice(name: 'PROJECT_TYPE', choices: ['web', 'mobile', 'workflow'], description: 'Project type')
-        choice(name: 'NAMESPACE', choices: ['uat', 'prod'], description: 'Environment')
+        choice(name: 'PROJECT_TYPE', choices: ['web', 'mobile', 'workflow'])
+        choice(name: 'NAMESPACE', choices: ['uat', 'prod'])
+        string(name: 'BACKEND_HOSTNAME', description: 'Host name giriniz')
+        string(name: 'BACKEND_PATH', description: 'Path var ise giriniz')
+        string(name: 'DB_NAME', description: 'Db name giriniz')
     }
 
     stages {
         stage('Create GCP Secrets') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'db-user', variable: 'DB_USER'),
-                    string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
-                ]) {
+                script {
+                    def workspace = params.WORKSPACE.toLowerCase()
+                    def project   = params.PROJECT.toLowerCase()
+
+                    withCredentials([
+                        string(credentialsId: 'db-user', variable: 'DB_USER'),
+                        string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
+                    ])
+                    {
+                      withEnv([
+                          "WORKSPACE_LOWER=${workspace}",
+                          "PROJECT_LOWER=${project}"
+                      ])
+
+                    {
                     sh '''
                     set -e
 
@@ -73,7 +87,7 @@ pipeline {
                             exit 1
                         fi
 
-                        # JSON oluştur (sed ile)
+                        # JSON oluştur
                         sed \
                           -e "s|\\\${DB_USER}|$DB_USER|g" \
                           -e "s|\\\${DB_PASSWORD}|$DB_PASSWORD|g" \
@@ -90,8 +104,15 @@ pipeline {
                         echo "✅ Secret created successfully: $SECRET_NAME"
                     done
                     '''
+                        }
+                    }
                 }
             }
+        }
+    }
+        post {
+        always {
+            cleanWs()
         }
     }
 }
