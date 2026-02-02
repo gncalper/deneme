@@ -21,7 +21,13 @@ pipeline {
                     withCredentials([
                         string(credentialsId: 'db-user', variable: 'DB_USER'),
                         string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
-                    ]) {
+                    ])
+                    withEnv([
+                        "WORKSPACE_LOWER=${workspace}",
+                        "PROJECT_LOWER=${project}"
+                    ])
+
+                    {
                     sh '''
                     set -e
 
@@ -64,7 +70,7 @@ pipeline {
                     # 2️⃣ LOOP (NO GCP CALLS)
                     # -------------------------------------------------
                     for COMPONENT in $COMPONENTS; do
-                        SECRET_NAME="${workspace}-${project}-${COMPONENT}-secret-${NAMESPACE}"
+                        SECRET_NAME="${WORKSPACE_LOWER}-${PROJECT_LOWER}-${COMPONENT}-secret-${NAMESPACE}"
                         TEMPLATE="cred-templates/${COMPONENT}-${NAMESPACE}.json.tpl"
                         OUTPUT="preview-${COMPONENT}.json"
 
