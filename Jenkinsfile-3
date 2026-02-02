@@ -65,7 +65,7 @@ pipeline {
                     # 2️⃣ COMPONENT LOOP
                     # -------------------------------------------------
                     for COMPONENT in $COMPONENTS; do
-                        SECRET_NAME="${WORKSPACE}-${PROJECT}-${COMPONENT}-secret-${NAMESPACE}"
+                        SECRET_NAME="${WORKSPACE_LOWER}-${PROJECT_LOWER}-${COMPONENT}-secret-${NAMESPACE}"
                         TEMPLATE="cred-templates/${COMPONENT}-${NAMESPACE}.json.tpl"
                         OUTPUT_FILE="secret-${COMPONENT}.json"
 
@@ -91,6 +91,9 @@ pipeline {
                         sed \
                           -e "s|\\\${DB_USER}|$DB_USER|g" \
                           -e "s|\\\${DB_PASSWORD}|$DB_PASSWORD|g" \
+                          -e "s|\\\${BACKEND_HOSTNAME}|$BACKEND_HOSTNAME|g" \
+                          -e "s|\\\${BACKEND_PATH}|$BACKEND_PATH|g" \
+                          -e "s|\\\${DB_NAME}|$DB_NAME|g" \
                           "$TEMPLATE" > "$OUTPUT_FILE"
 
                         # Secret oluştur
