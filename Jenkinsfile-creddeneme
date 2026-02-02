@@ -14,6 +14,10 @@ pipeline {
     stages {
         stage('DRY-RUN Secret Plan') {
             steps {
+
+                def workspace = params.WORKSPACE.toLowerCase()
+                def project   = params.PROJECT.toLowerCase()
+
                 withCredentials([
                     string(credentialsId: 'db-user', variable: 'DB_USER'),
                     string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
@@ -60,7 +64,7 @@ pipeline {
                     # 2️⃣ LOOP (NO GCP CALLS)
                     # -------------------------------------------------
                     for COMPONENT in $COMPONENTS; do
-                        SECRET_NAME="${WORKSPACE}-${PROJECT}-${COMPONENT}-secret-${NAMESPACE}"
+                        SECRET_NAME="${workspace}-${project}-${COMPONENT}-secret-${NAMESPACE}"
                         TEMPLATE="cred-templates/${COMPONENT}-${NAMESPACE}.json.tpl"
                         OUTPUT="preview-${COMPONENT}.json"
 
