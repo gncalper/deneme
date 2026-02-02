@@ -60,7 +60,7 @@ pipeline {
         stage('Validate Target Directory') {
             steps {
                 script {
-                    env.TARGET_DIR = "customers-argo/${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+                    env.TARGET_DIR = "customers-argo/${params.WORKSPACE}/${params.PROJECT}/${params.PROJECT}-${params.NAMESPACE}"
 
                     if (fileExists(env.TARGET_DIR)) {
                         error "❌ ${env.TARGET_DIR} zaten mevcut. Build durduruldu."
