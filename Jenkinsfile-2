@@ -57,6 +57,19 @@ pipeline {
             }
         }
 
+        stage('Validate Target Directory') {
+            steps {
+                script {
+                    env.TARGET_DIR = "customers-argo/${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+
+                    if (fileExists(env.TARGET_DIR)) {
+                        error "❌ ${env.TARGET_DIR} zaten mevcut. Build durduruldu."
+                    }
+                }
+            }
+        }
+
+
         stage('Generate Helm Values') {
             steps {
                 script {
@@ -114,5 +127,53 @@ pipeline {
             }
         }
 
+stage('Commit Values to Repo') {
+    steps {
+        script {
+            sh "git checkout master"
+
+            if (params.PROJECT_TYPE == 'web') {
+
+                sh """
+                    mkdir -p ${env.TARGET_DIR}/backend
+                    mkdir -p ${env.TARGET_DIR}/frontend
+
+                    mv values-backend.yaml  ${env.TARGET_DIR}/backend/values.yaml
+                    mv values-frontend.yaml ${env.TARGET_DIR}/frontend/values.yaml
+
+                    git add ${env.TARGET_DIR}/backend/values.yaml
+                    git add ${env.TARGET_DIR}/frontend/values.yaml
+                """
+
+            } else if (params.PROJECT_TYPE == 'mobile') {
+
+                sh """
+                    mkdir -p ${env.TARGET_DIR}/backend
+                    mv values-backend.yaml ${env.TARGET_DIR}/backend/values.yaml
+                    git add ${env.TARGET_DIR}/backend/values.yaml
+                """
+
+            } else if (params.PROJECT_TYPE == 'workflow') {
+
+                sh """
+                    mkdir -p ${env.TARGET_DIR}/workflow
+                    mv values-backend.yaml ${env.TARGET_DIR}/workflow/values.yaml
+                    git add ${env.TARGET_DIR}/workflow/values.yaml
+                """
+            }
+
+            sh """
+                git commit -m "Add ${params.PROJECT_TYPE} values for ${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+                git push origin master
+            """
+        }
     }
 }
+
+
+            post {
+                always {
+                    cleanWs()
+                }
+            }
+        }
