@@ -168,13 +168,12 @@ stage('Commit Values to Repo') {
             """
         }
     }
+  }
 }
 
-
-        post {
-            always {
-                cleanWs()
-            }
+    post {
+        always {
+            cleanWs()
         }
     }
 }
