@@ -14,14 +14,14 @@ pipeline {
     stages {
         stage('DRY-RUN Secret Plan') {
             steps {
+                script {
+                    def workspace = params.WORKSPACE.toLowerCase()
+                    def project   = params.PROJECT.toLowerCase()
 
-                def workspace = params.WORKSPACE.toLowerCase()
-                def project   = params.PROJECT.toLowerCase()
-
-                withCredentials([
-                    string(credentialsId: 'db-user', variable: 'DB_USER'),
-                    string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
-                ]) {
+                    withCredentials([
+                        string(credentialsId: 'db-user', variable: 'DB_USER'),
+                        string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
+                    ]) {
                     sh '''
                     set -e
 
@@ -98,6 +98,7 @@ pipeline {
 
                     echo "✅ DRY RUN completed successfully"
                     '''
+                    }
                 }
             }
         }
