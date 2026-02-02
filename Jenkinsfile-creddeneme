@@ -22,10 +22,11 @@ pipeline {
                         string(credentialsId: 'db-user', variable: 'DB_USER'),
                         string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
                     ])
-                    withEnv([
-                        "WORKSPACE_LOWER=${workspace}",
-                        "PROJECT_LOWER=${project}"
-                    ])
+                    {
+                      withEnv([
+                          "WORKSPACE_LOWER=${workspace}",
+                          "PROJECT_LOWER=${project}"
+                      ])
 
                     {
                     sh '''
