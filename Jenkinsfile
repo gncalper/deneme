@@ -111,6 +111,7 @@ pipeline {
                     def httpPathValue = params.HOST_PATH ? "true" : "false"
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
+                    def backendType = "backend"
 
                     if (params.PROJECT_TYPE == 'workflow') {
                         backendType = "workflow"
