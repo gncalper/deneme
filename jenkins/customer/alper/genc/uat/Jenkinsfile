@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+
+    environment {
+        WORKSPACE      = 'alper'
+        PROJECT        = 'genc'
+        CONFIG_DIR     = 'deneme'
+        NAMESPACE      = 'alper-uat'
+        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/alper/genc"
+    }
+
+    stages {
+
+        stage('Prepare Backend Workspace') {
+            steps {
+                sh """
+                    mkdir -p backend-temp
+                    cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/Backend/* backend-temp/
+                """
+            }
+        }
+
+        stage('Build Backend Image') {
+            steps {
+                script {
+                    def projectLower   = env.PROJECT.toLowerCase()
+                    def workspaceLower = env.WORKSPACE.toLowerCase()
+                    def namespaceLower = env.NAMESPACE.toLowerCase()
+
+                    dir('backend-temp') {
+                        sh """
+                            docker buildx build \
+                            --platform linux/amd64 \
+                            -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER} \
+                            --load .
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push Images to GCP Artifact Registry') {
+            steps {
+                script {
+                    def projectLower   = env.PROJECT.toLowerCase()
+                    def workspaceLower = env.WORKSPACE.toLowerCase()
+                    def namespaceLower = env.NAMESPACE.toLowerCase()
+
+                    def images = [
+                        "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER}"
+                    ]
+
+                    sh 'gcloud auth configure-docker europe-west4-docker.pkg.dev --quiet'
+
+                    images.each { image ->
+                        sh """
+                            docker tag ${image} europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/${image}
+                            docker push europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/${image}
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
