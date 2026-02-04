@@ -27,6 +27,7 @@ pipelineJob("${basePath}/deploy") {
             scm {
                 git('https://github.com/gncalper/deneme.git', 'master')
             }
+            scriptPath("jenkins/customer/${workspace}/${project}/${namespace}/Jenkinsfile")
         }
     }
 }

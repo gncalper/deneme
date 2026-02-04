@@ -77,6 +77,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Run Job DSL') {
+            steps {
+                jobDsl(
+                    targets: 'job-dsl/create_noneapproval.groovy',
+                    additionalParameters: [
+                        WORKSPACE: params.WORKSPACE,
+                        PROJECT  : params.PROJECT,
+                        NAMESPACE: params.NAMESPACE
+                    ]
+                )
+            }
+        }
     }
 
     post {
