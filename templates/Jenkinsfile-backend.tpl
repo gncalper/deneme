@@ -10,13 +10,15 @@ pipeline {
     }
 
     stages {
-
-        stage('Prepare Backend Workspace') {
+        stage('Prepare Temporary Workspace') {
             steps {
-                sh """
-                    mkdir -p backend-temp
-                    cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/Backend/* backend-temp/
-                """
+                script {
+                    echo 'Preparing temporary workspace for build...'
+                    sh '''
+                        mkdir -p frontend-temp backend-temp
+                        cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/Backend/* backend-temp/
+                    '''
+                }
             }
         }
 
@@ -50,10 +52,9 @@ pipeline {
                         "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER}"
                     ]
 
-                    sh 'gcloud auth configure-docker europe-west4-docker.pkg.dev --quiet'
-
                     images.each { image ->
                         sh """
+                            gcloud auth configure-docker europe-west4-docker.pkg.dev
                             docker tag ${image} europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/${image}
                             docker push europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/${image}
                         """
