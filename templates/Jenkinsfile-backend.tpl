@@ -6,7 +6,6 @@ pipeline {
         PROJECT        = '@PROJECT@'
         CONFIG_DIR     = '@CONFIG_DIR@'
         NAMESPACE      = '@WORKSPACE@-@NAMESPACE@'
-        PROJECT_TYPE   = '@PROJECT-TYPE@'
         CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/@WORKSPACE@/@PROJECT@"
     }
 
@@ -18,47 +17,6 @@ pipeline {
                     mkdir -p backend-temp
                     cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/Backend/* backend-temp/
                 """
-            }
-        }
-
-        stage('Prepare Frontend Workspace') {
-            when {
-                expression { env.PROJECT_TYPE == 'web' }
-            }
-            steps {
-                sh """
-                    mkdir -p frontend-temp
-                    cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/React/ReactProjectTemplate/* frontend-temp/
-                """
-            }
-        }
-
-        stage('Build Frontend Image') {
-            when {
-                expression { env.PROJECT_TYPE == 'web' }
-            }
-            steps {
-                script {
-                    def projectLower   = env.PROJECT.toLowerCase()
-                    def workspaceLower = env.WORKSPACE.toLowerCase()
-                    def namespaceLower = env.NAMESPACE.toLowerCase()
-
-                    dir('frontend-temp') {
-                        sh """
-                            yarn build:prod-mode
-                            cp -Rf /home/code-generation/platform/resources/dockerFiles/. ./build
-                        """
-
-                        dir('build') {
-                            sh """
-                                docker buildx build \
-                                --platform linux/amd64 \
-                                -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER} \
-                                --load .
-                            """
-                        }
-                    }
-                }
             }
         }
 
@@ -91,12 +49,6 @@ pipeline {
                     def images = [
                         "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER}"
                     ]
-
-                    if (env.PROJECT_TYPE == 'web') {
-                        images.add(
-                            "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER}"
-                        )
-                    }
 
                     sh 'gcloud auth configure-docker europe-west4-docker.pkg.dev --quiet'
 

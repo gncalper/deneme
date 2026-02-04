@@ -2,28 +2,14 @@ pipeline {
     agent any
 
     environment {
-        WORKSPACE      = 'alper'
-        PROJECT        = 'genc'
-        CONFIG_DIR     = 'deneme'
-        NAMESPACE      = 'alper-uat'
-        PROJECT_TYPE   = 'web'
-        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/alper/genc"
+        WORKSPACE      = '@WORKSPACE@'
+        PROJECT        = '@PROJECT@'
+        CONFIG_DIR     = '@CONFIG_DIR@'
+        NAMESPACE      = '@WORKSPACE@-@NAMESPACE@'
+        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/@WORKSPACE@/@PROJECT@"
     }
 
     stages {
-
-        stage('Debug Env') {
-            steps {
-                sh """
-                    echo "WORKSPACE is ${WORKSPACE}"
-                    echo "PROJECT is ${PROJECT}"
-                    echo "CONFIG_DIR is ${$CONFIG_DIR}"
-                    echo "NAMESPACE is ${NAMESPACE}"
-                    echo "FRONTEND is ${FRONTEND}"
-                    echo "CUSTOMER_CODE_DIR is ${CUSTOMER_CODE_DIR}"
-                """
-            }
-        }
 
         stage('Prepare Backend Workspace') {
             steps {
@@ -35,9 +21,6 @@ pipeline {
         }
 
         stage('Prepare Frontend Workspace') {
-            when {
-                expression { env.PROJECT_TYPE == 'web' }
-            }
             steps {
                 sh """
                     mkdir -p frontend-temp
@@ -47,9 +30,7 @@ pipeline {
         }
 
         stage('Build Frontend Image') {
-            when {
-                expression { env.PROJECT_TYPE == 'web' }
-            }
+
             steps {
                 script {
                     def projectLower   = env.PROJECT.toLowerCase()
@@ -102,14 +83,9 @@ pipeline {
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
                     def images = [
+                        "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER}",
                         "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER}"
                     ]
-
-                    if (env.FRONTEND == 'true') {
-                        images.add(
-                            "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER}"
-                        )
-                    }
 
                     sh 'gcloud auth configure-docker europe-west4-docker.pkg.dev --quiet'
 

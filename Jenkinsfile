@@ -46,14 +46,24 @@ pipeline {
         stage('Generate Jenkinsfile') {
             steps {
                 script {
-                    def template = readFile 'templates/Jenkinsfile.tpl'
+
+                    def templateFile = ""
+
+                    if (params.PROJECT_TYPE == 'web') {
+                        templateFile = 'templates/Jenkinsfile-frontend.tpl'
+                    } else if (params.PROJECT_TYPE in ['mobile', 'workflow']) {
+                        templateFile = 'templates/Jenkinsfile-backend.tpl'
+                    }
+
+                    echo "Using template: ${templateFile}"
+
+                    def template = readFile templateFile
 
                     def result = template
                         .replace('@WORKSPACE@', params.WORKSPACE)
                         .replace('@PROJECT@', params.PROJECT)
                         .replace('@CONFIG_DIR@', params.CONFIG_DIR)
                         .replace('@NAMESPACE@', params.NAMESPACE)
-                        .replace('@PROJECT-TYPE@', params.PROJECT_TYPE)
 
                     writeFile file: 'Jenkinsfile', text: result
 
@@ -61,6 +71,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Commit Jenkinsfile to Repo') {
             steps {
