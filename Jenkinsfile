@@ -128,7 +128,7 @@ pipeline {
                         .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
                         .replace('@BACKEND_PATH@', params.BACKEND_PATH)
 
-                    writeFile file: 'values-workflow.yaml', text: wfeValues
+                    writeFile file: 'values-workflow.yaml', text: workflowValues
                     echo "workflow values.yaml generated"
 
                     if (params.PROJECT_TYPE == 'mobile') {
@@ -146,7 +146,7 @@ pipeline {
                             .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
                             .replace('@BACKEND_PATH@', params.BACKEND_PATH)
 
-                        writeFile file: 'values-backend.yaml', text: wfeValues
+                        writeFile file: 'values-backend.yaml', text: backendValues
                         echo "backend values.yaml generated"
 
                     if (params.PROJECT_TYPE == 'web') {
