@@ -51,8 +51,10 @@ pipeline {
 
                     if (params.PROJECT_TYPE == 'web') {
                         templateFile = 'templates/Jenkinsfile-frontend.tpl'
-                    } else if (params.PROJECT_TYPE in ['mobile', 'workflow']) {
+                    } else if (params.PROJECT_TYPE in ['mobile']) {
                         templateFile = 'templates/Jenkinsfile-backend.tpl'
+                    } else if (params.PROJECT_TYPE in ['workflow']) {
+                      templateFile = 'templates/Jenkinsfile-workflow.tpl'
                     }
 
                     echo "Using template: ${templateFile}"

@@ -2,16 +2,14 @@ pipeline {
     agent {
         node {
             label 'platform'
-
         }
     }
 
     environment {
-        WORKSPACE      = 'alper'
-        PROJECT        = 'genc'
-        CONFIG_DIR     = 'deneme'
-        NAMESPACE      = 'alper-uat'
-        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/alper/genc"
+        WORKSPACE      = '@WORKSPACE@'
+        PROJECT        = '@PROJECT@'
+        NAMESPACE      = '@WORKSPACE@-@NAMESPACE@'
+        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/@WORKSPACE@/@PROJECT@"
     }
 
     stages {
@@ -20,23 +18,23 @@ pipeline {
                 script {
                     echo 'Preparing temporary workspace for build...'
                     sh '''
-                        mkdir -p frontend-temp backend-temp
-                        cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/Backend/* backend-temp/
+                        mkdir -p wfe-temp
+                        cp -R ${CUSTOMER_CODE_DIR}/* wfe-temp/
                     '''
                 }
             }
         }
 
-        stage('Build Backend Image') {
+        stage('Build WFE Image') {
             steps {
                 script {
                     def projectLower   = env.PROJECT.toLowerCase()
                     def workspaceLower = env.WORKSPACE.toLowerCase()
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
-                    dir('backend-temp') {
-                        echo 'Building Docker image for Backend...'
-                        sh "docker buildx build --platform linux/amd64 -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER} --load ."
+                    dir('wfe-temp') {
+                        echo 'Building Docker image for Wfe...'
+                        sh "docker buildx build --platform linux/amd64 -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-workflow:${env.BUILD_NUMBER} --load ."
                     }
                 }
             }
@@ -50,7 +48,7 @@ pipeline {
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
                     def images = [
-                        "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER}"
+                        "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-workflow:${env.BUILD_NUMBER}"
                     ]
 
                     images.each { image ->
