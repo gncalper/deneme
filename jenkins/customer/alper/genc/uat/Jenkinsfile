@@ -1,0 +1,132 @@
+pipeline {
+    agent any
+
+    environment {
+        WORKSPACE      = 'alper'
+        PROJECT        = 'genc'
+        CONFIG_DIR     = 'deneme'
+        NAMESPACE      = 'alper-uat'
+        PROJECT_TYPE   = 'web'
+        CUSTOMER_CODE_DIR = "/home/generated-apps/temp/platform/alper/genc"
+    }
+
+    stages {
+
+        stage('Debug Env') {
+            steps {
+                sh """
+                    echo "WORKSPACE is ${WORKSPACE}"
+                    echo "PROJECT is ${PROJECT}"
+                    echo "CONFIG_DIR is ${$CONFIG_DIR}"
+                    echo "NAMESPACE is ${NAMESPACE}"
+                    echo "FRONTEND is ${FRONTEND}"
+                    echo "CUSTOMER_CODE_DIR is ${CUSTOMER_CODE_DIR}"
+                """
+            }
+        }
+
+        stage('Prepare Backend Workspace') {
+            steps {
+                sh """
+                    mkdir -p backend-temp
+                    cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/Backend/* backend-temp/
+                """
+            }
+        }
+
+        stage('Prepare Frontend Workspace') {
+            when {
+                expression { env.PROJECT_TYPE == 'web' }
+            }
+            steps {
+                sh """
+                    mkdir -p frontend-temp
+                    cp -R ${CUSTOMER_CODE_DIR}/${CONFIG_DIR}/React/ReactProjectTemplate/* frontend-temp/
+                """
+            }
+        }
+
+        stage('Build Frontend Image') {
+            when {
+                expression { env.PROJECT_TYPE == 'web' }
+            }
+            steps {
+                script {
+                    def projectLower   = env.PROJECT.toLowerCase()
+                    def workspaceLower = env.WORKSPACE.toLowerCase()
+                    def namespaceLower = env.NAMESPACE.toLowerCase()
+
+                    dir('frontend-temp') {
+                        sh """
+                            yarn build:prod-mode
+                            cp -Rf /home/code-generation/platform/resources/dockerFiles/. ./build
+                        """
+
+                        dir('build') {
+                            sh """
+                                docker buildx build \
+                                --platform linux/amd64 \
+                                -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER} \
+                                --load .
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build Backend Image') {
+            steps {
+                script {
+                    def projectLower   = env.PROJECT.toLowerCase()
+                    def workspaceLower = env.WORKSPACE.toLowerCase()
+                    def namespaceLower = env.NAMESPACE.toLowerCase()
+
+                    dir('backend-temp') {
+                        sh """
+                            docker buildx build \
+                            --platform linux/amd64 \
+                            -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER} \
+                            --load .
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push Images to GCP Artifact Registry') {
+            steps {
+                script {
+                    def projectLower   = env.PROJECT.toLowerCase()
+                    def workspaceLower = env.WORKSPACE.toLowerCase()
+                    def namespaceLower = env.NAMESPACE.toLowerCase()
+
+                    def images = [
+                        "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER}"
+                    ]
+
+                    if (env.FRONTEND == 'true') {
+                        images.add(
+                            "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER}"
+                        )
+                    }
+
+                    sh 'gcloud auth configure-docker europe-west4-docker.pkg.dev --quiet'
+
+                    images.each { image ->
+                        sh """
+                            docker tag ${image} europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/${image}
+                            docker push europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/${image}
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
