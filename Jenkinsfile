@@ -85,7 +85,11 @@ pipeline {
 
                         git add ${env.TARGET_DIR}/Jenkinsfile
                         git commit -m "Add Jenkinsfile for ${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
-                        git push origin master
+                        if ! git push origin master; then
+                            echo "Push başarısız, pull yapılıyor ve tekrar deneniyor..."
+                            git pull --rebase origin master
+                            git push origin master
+                        fi
                     """
                 }
             }
