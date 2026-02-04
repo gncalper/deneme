@@ -1,7 +1,7 @@
-appName: "@WORKSPACE@-@PROJECT@-uat-frontend"
+appName: "@WORKSPACE@-@PROJECT@-uat-backend"
 namespace: "@WORKSPACE@-uat"
 deploy:
-  imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-frontend"
+  imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-@BACKEND_TYPE@"
   tag: "1"
 labels:
   customer: "@WORKSPACE@"
@@ -20,17 +20,26 @@ service:
   enabled: true
   type: ClusterIP
   port: 80
-  targetPort: 3000
-envFromSecret: @ENV_FROM_SECRET@
+  targetPort: 8080
+env:
+- name: DOTNET_TieredPGO
+  value: "1"
+- name: DOTNET_ReadyToRun
+  value: "1"
+- name: DOTNET_GCHeapHardLimitPercent
+  value: "70"
+- name: ASPNETCORE_URLS
+  value: "http://0.0.0.0:8080"
+envFromSecret: true
 externalSecret:
-  enabled: @EXTERNAL_SECRET_ENABLED@
+  enabled: true
   refreshInterval: 1h0m0s
   target:
     creationPolicy: Owner
   secretStoreRef:
     name: gcp-store
     kind: ClusterSecretStore
-  key: @WORKSPACE@-@PROJECT@-frontend-secret-prod
+  key: @WORKSPACE@-@PROJECT@-@BACKEND_TYPE@-secret-@NAMESPACE@
 pvc:
   enabled: false
   storageClassName: "standard-rwo"
@@ -66,17 +75,17 @@ httpRoute:
     name: kuika-uat-gateway
     namespace: kuika-uat
   hostnames:
-  - "@FRONTEND_HOSTNAME@"
+  - "@BACKEND_HOSTNAME@"
   path:
     enabled: @HOST_PATH@
-    value: "/@FRONTEND_PATH@/"
+    value: "/@BACKEND_PATH@/"
 resources:
   requests:
-    cpu: "20m"
-    memory: "20Mi"
+    cpu: "50m"
+    memory: "250Mi"
   limits:
-    cpu: "40m"
-    memory: "40Mi"
+    memory: "750Mi"
+    cpu: "200m"
 livenessProbe:
   enabled: true
   path: "/"
@@ -94,7 +103,7 @@ readinessProbe:
 startupProbe:
   enabled: true
   type: tcp
-  port: 3000
+  port: 8080
   initialDelaySeconds: 5
   periodSeconds: 5
   timeoutSeconds: 10

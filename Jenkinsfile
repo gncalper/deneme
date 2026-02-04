@@ -7,6 +7,11 @@ pipeline {
         string(name: 'CONFIG_DIR')
         choice( name: 'NAMESPACE',choices: ['uat', 'prod'], description: 'Is your project for testing or production?')
         choice( name: 'PROJECT_TYPE',choices: ['web', 'mobile','workflow'], description: 'Is your project for mobil, workflow or web?')
+        booleanParam(name: 'HOST_PATH',defaultValue: false,description: 'Host path kullanılacak mı?')
+        string(name: 'BACKEND_HOSTNAME', description: 'Uygulamanın backend veya workflow url ini girin')
+        string(name: 'BACKEND_PATH', defaultValue: '', description: 'Path (Host path checkbox işaretli ise uygulamanın backend pathi var ise değer giriniz yoksa boş bırakınız)' )
+        string(name: 'FRONTEND_HOSTNAME', description: 'Uygulamanın frontend url ini girin')
+        string(name: 'FRONTEND_PATH', defaultValue: '', description: 'Path (Host path checkbox işaretli ise uygulamanın frontend pathi var ise değer giriniz yoksa boş bırakınız)' )
         }
 
     stages {
@@ -14,7 +19,6 @@ pipeline {
         stage('Validate Parameters') {
             steps {
                 script {
-
                     if (!params.WORKSPACE?.trim()) {
                         error "WORKSPACE zorunludur ve boş olamaz"
                     }
@@ -26,6 +30,29 @@ pipeline {
                     if (!params.CONFIG_DIR?.trim()) {
                         error "CONFIG_DIR zorunludur ve boş olamaz"
                     }
+
+                    if (!params.BACKEND_HOSTNAME?.trim()) {
+                        error "BACKEND_HOSTNAME zorunludur ve boş olamaz"
+                    }
+
+                    if (params.PROJECT_TYPE == 'web') {
+                        if (!params.FRONTEND_HOSTNAME?.trim()) {
+                            error "PROJECT_TYPE=web iken FRONTEND_HOSTNAME zorunludur"
+                        }
+                    }
+
+                    if (!params.HOST_PATH && (params.BACKEND_PATH?.trim() || params.FRONTEND_PATH?.trim())) {
+                        error "HOST_PATH checkbox işaretliyken BACKEND_PATH / FRONTEND_PATH girilmemelidir"
+                    }
+
+                    if (params.HOST_PATH && !params.BACKEND_PATH?.trim()) {
+                        error "HOST_PATH checkbox işaretliyken BACKEND_PATH zorunludur"
+                    }
+
+                    if (params.HOST_PATH && params.PROJECT_TYPE == 'web' && !params.FRONTEND_PATH?.trim()) {
+                        error "HOST_PATH checkbox işaretliyken FRONTEND_PATH zorunludur "
+                    }
+
                 }
             }
         }
@@ -33,8 +60,12 @@ pipeline {
         stage('Validate Target Directory') {
             steps {
                 script {
-                    env.TARGET_DIR = "jenkins/customer/${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+                    env.JENKINS_DIR = "jenkins/customer/${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+                    env.TARGET_DIR = "customers-argo/${params.WORKSPACE}/${params.PROJECT}/${params.WORKSPACE}-${params.NAMESPACE}"
 
+                    if (fileExists(env.JENKINS_DIR)) {
+                        error "❌ ${env.JENKINS_DIR} zaten mevcut. Build durduruldu."
+                    }
                     if (fileExists(env.TARGET_DIR)) {
                         error "❌ ${env.TARGET_DIR} zaten mevcut. Build durduruldu."
                     }
@@ -74,17 +105,139 @@ pipeline {
             }
         }
 
-
-        stage('Commit Jenkinsfile to Repo') {
+        stage('Generate Helm Values') {
             steps {
                 script {
-                    sh """
-                        git checkout master
-                        mkdir -p ${env.TARGET_DIR}
-                        mv Jenkinsfile ${env.TARGET_DIR}/Jenkinsfile
+                    def httpPathValue = params.HOST_PATH ? "true" : "false"
+                    def workspace = params.WORKSPACE.toLowerCase()
+                    def project   = params.PROJECT.toLowerCase()
 
-                        git add ${env.TARGET_DIR}/Jenkinsfile
-                        git commit -m "Add Jenkinsfile for ${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+                    if (params.PROJECT_TYPE == 'workflow') {
+                        backendType = "workflow"
+                    }
+
+                    def workflowTpl = readFile 'templates/workflow.yaml.tpl'
+
+                    def workflowValues = workflowTpl
+                        .replace('@WORKSPACE@', workspace)
+                        .replace('@PROJECT@', project)
+                        .replace('@NAMESPACE@', params.NAMESPACE)
+                        .replace('@HOST_PATH@', httpPathValue)
+                        .replace('@BACKEND_TYPE@', backendType)
+                        .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
+                        .replace('@BACKEND_PATH@', params.BACKEND_PATH)
+
+                    writeFile file: 'values-workflow.yaml', text: wfeValues
+                    echo "workflow values.yaml generated"
+
+                    if (params.PROJECT_TYPE == 'mobile') {
+                        backendType = "backend"
+                    }
+
+                        def backendTpl = readFile 'templates/backend.yaml.tpl'
+
+                        def backendValues = backendTpl
+                            .replace('@WORKSPACE@', workspace)
+                            .replace('@PROJECT@', project)
+                            .replace('@NAMESPACE@', params.NAMESPACE)
+                            .replace('@HOST_PATH@', httpPathValue)
+                            .replace('@BACKEND_TYPE@', backendType)
+                            .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
+                            .replace('@BACKEND_PATH@', params.BACKEND_PATH)
+
+                        writeFile file: 'values-backend.yaml', text: wfeValues
+                        echo "backend values.yaml generated"
+
+                    if (params.PROJECT_TYPE == 'web') {
+
+                        def frontendEnvFromSecret = "false"
+                        def frontendExternalSecret = "false"
+
+                        if (params.NAMESPACE == 'prod') {
+                            frontendEnvFromSecret = "true"
+                            frontendExternalSecret = "true"
+                        }
+
+                        def frontendTpl = readFile 'templates/frontend.yaml.tpl'
+
+                        def frontendValues = frontendTpl
+                            .replace('@WORKSPACE@', workspace)
+                            .replace('@PROJECT@', project)
+                            .replace('@NAMESPACE@', params.NAMESPACE)
+                            .replace('@HOST_PATH@', httpPathValue)
+                            .replace('@FRONTEND_HOSTNAME@', params.FRONTEND_HOSTNAME)
+                            .replace('@FRONTEND_PATH@', params.FRONTEND_PATH)
+                            .replace('@ENV_FROM_SECRET@', frontendEnvFromSecret)
+                            .replace('@EXTERNAL_SECRET_ENABLED@', frontendExternalSecret)
+
+                        writeFile file: 'values-frontend.yaml', text: frontendValues
+                        echo "Frontend values.yaml generated"
+                    } else {
+                        echo "PROJECT_TYPE web değil → frontend values.yaml oluşturulmadı"
+                    }
+                }
+            }
+        }
+
+        stage('Commit to Repo') {
+            steps {
+                script {
+                    sh "git checkout master"
+
+
+                        if (params.PROJECT_TYPE == 'web') {
+
+                            sh """
+                                mkdir -p ${env.TARGET_DIR}/backend
+                                mkdir -p ${env.TARGET_DIR}/frontend
+
+                                mv values-backend.yaml  ${env.TARGET_DIR}/backend/values.yaml
+                                mv values-frontend.yaml ${env.TARGET_DIR}/frontend/values.yaml
+
+                                git add ${env.TARGET_DIR}/backend/values.yaml
+                                git add ${env.TARGET_DIR}/frontend/values.yaml
+                            """
+
+                        } else if (params.PROJECT_TYPE == 'mobile') {
+
+                            sh """
+                                mkdir -p ${env.TARGET_DIR}/backend
+                                mv values-backend.yaml ${env.TARGET_DIR}/backend/values.yaml
+                                git add ${env.TARGET_DIR}/backend/values.yaml
+                            """
+
+                        } else if (params.PROJECT_TYPE == 'workflow') {
+
+                            sh """
+                                mkdir -p ${env.TARGET_DIR}/workflow
+                                mv values-workflow.yaml ${env.TARGET_DIR}/workflow/values.yaml
+                                git add ${env.TARGET_DIR}/workflow/values.yaml
+                            """
+                        }
+
+
+                        sh """
+                            mkdir -p ${env.JENKINS_DIR}
+                            mv Jenkinsfile ${env.JENKINS_DIR}/Jenkinsfile
+                            git add ${env.JENKINS_DIR}/Jenkinsfile
+                        """
+
+                        sh """
+                        git commit -m "Add ${params.PROJECT_TYPE} values and Jenkinsfile for ${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+
+                        if ! git push origin master; then
+                            echo "Push başarısız, pull --rebase yapılıyor..."
+                            git pull --rebase origin master
+                            git push origin master
+                        fi
+                        """
+
+
+
+
+
+
+
                         if ! git push origin master; then
                             echo "Push başarısız, pull yapılıyor ve tekrar deneniyor..."
                             git pull --rebase origin master
