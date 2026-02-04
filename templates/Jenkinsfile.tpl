@@ -12,19 +12,6 @@ pipeline {
 
     stages {
 
-        stage('Debug Env') {
-            steps {
-                sh """
-                    echo "WORKSPACE is ${WORKSPACE}"
-                    echo "PROJECT is ${PROJECT}"
-                    echo "CONFIG_DIR is ${$CONFIG_DIR}"
-                    echo "NAMESPACE is ${NAMESPACE}"
-                    echo "FRONTEND is ${FRONTEND}"
-                    echo "CUSTOMER_CODE_DIR is ${CUSTOMER_CODE_DIR}"
-                """
-            }
-        }
-
         stage('Prepare Backend Workspace') {
             steps {
                 sh """
@@ -105,7 +92,7 @@ pipeline {
                         "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER}"
                     ]
 
-                    if (env.FRONTEND == 'true') {
+                    if (env.PROJECT_TYPE == 'web') {
                         images.add(
                             "kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER}"
                         )
