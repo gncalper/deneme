@@ -231,19 +231,6 @@ pipeline {
                             git push origin master
                         fi
                         """
-
-
-
-
-
-
-
-                        if ! git push origin master; then
-                            echo "Push başarısız, pull yapılıyor ve tekrar deneniyor..."
-                            git pull --rebase origin master
-                            git push origin master
-                        fi
-                    """
                 }
             }
         }
