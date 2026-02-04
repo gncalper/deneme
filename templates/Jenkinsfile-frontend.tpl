@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        node {
+            label 'platform'
+
+        }
+    }
 
     environment {
         WORKSPACE      = '@WORKSPACE@'
@@ -32,18 +37,14 @@ pipeline {
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
                     dir('frontend-temp') {
-                        sh """
+                        sh '''
                             yarn build:prod-mode
                             cp -Rf /home/code-generation/platform/resources/dockerFiles/. ./build
-                        """
+                        '''
 
                         dir('build') {
-                            sh """
-                                docker buildx build \
-                                --platform linux/amd64 \
-                                -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER} \
-                                --load .
-                            """
+                            echo 'Building Docker image for UI...'
+                            sh "docker buildx build --platform linux/amd64 -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-frontend:${env.BUILD_NUMBER} --load ."
                         }
                     }
                 }
@@ -58,12 +59,8 @@ pipeline {
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
                     dir('backend-temp') {
-                        sh """
-                            docker buildx build \
-                            --platform linux/amd64 \
-                            -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER} \
-                            --load .
-                        """
+                        echo 'Building Docker image for Backend...'
+                        sh "docker buildx build --platform linux/amd64 -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER} --load ."
                     }
                 }
             }
@@ -95,6 +92,7 @@ pipeline {
 
     post {
         always {
+            echo "Cleaning workspace..."
             cleanWs()
         }
     }

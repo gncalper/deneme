@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        node {
+            label 'platform'
+
+        }
+    }
 
     environment {
         WORKSPACE      = '@WORKSPACE@'
@@ -30,12 +35,8 @@ pipeline {
                     def namespaceLower = env.NAMESPACE.toLowerCase()
 
                     dir('backend-temp') {
-                        sh """
-                            docker buildx build \
-                            --platform linux/amd64 \
-                            -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER} \
-                            --load .
-                        """
+                        echo 'Building Docker image for Backend...'
+                        sh "docker buildx build --platform linux/amd64 -t kuika/${projectLower}-${workspaceLower}-${namespaceLower}.kuika.com-backend:${env.BUILD_NUMBER} --load ."
                     }
                 }
             }
@@ -66,6 +67,7 @@ pipeline {
 
     post {
         always {
+            echo "Cleaning workspace..."
             cleanWs()
         }
     }
