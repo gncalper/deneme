@@ -1,4 +1,4 @@
-appName: "@WORKSPACE@-@PROJECT@-uat-backend"
+appName: "@WORKSPACE@-@PROJECT@-uat-@BACKEND_TYPE@"
 namespace: "@WORKSPACE@-uat"
 deploy:
   imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-@BACKEND_TYPE@"
