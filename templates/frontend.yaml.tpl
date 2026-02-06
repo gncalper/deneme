@@ -1,5 +1,5 @@
-appName: "@WORKSPACE@-@PROJECT@-uat-frontend"
-namespace: "@WORKSPACE@-uat"
+appName: "@WORKSPACE@-@PROJECT@-@NAMESPACE@-frontend"
+namespace: "@WORKSPACE@-@NAMESPACE@"
 deploy:
   imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-frontend"
   tag: "1"

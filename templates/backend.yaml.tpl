@@ -1,5 +1,5 @@
-appName: "@WORKSPACE@-@PROJECT@-uat-backend"
-namespace: "@WORKSPACE@-uat"
+appName: "@WORKSPACE@-@PROJECT@-@NAMESPACE@-backend"
+namespace: "@WORKSPACE@-@NAMESPACE@"
 deploy:
   imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-@BACKEND_TYPE@"
   tag: "1"
@@ -72,8 +72,8 @@ hpa:
 httpRoute:
   enabled: true
   gateway:
-    name: kuika-uat-gateway
-    namespace: kuika-uat
+    name: @GATEWAY_NAME@
+    namespace: @GATEWAY_NAMESPACE@
   hostnames:
   - "@BACKEND_HOSTNAME@"
   path:

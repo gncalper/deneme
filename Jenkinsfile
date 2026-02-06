@@ -202,6 +202,10 @@ pipeline {
                             .replace('@FRONTEND_PATH@', params.FRONTEND_PATH)
                             .replace('@ENV_FROM_SECRET@', frontendEnvFromSecret)
                             .replace('@EXTERNAL_SECRET_ENABLED@', frontendExternalSecret)
+                            .replace('@NODEPOOL@', nodepool)
+                            .replace('@GATEWAY_NAME@', gatewayName)
+                            .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
+                            .replace('@HPA_ENABLED@', hpaEnabled)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
                         echo "Frontend values.yaml generated"
