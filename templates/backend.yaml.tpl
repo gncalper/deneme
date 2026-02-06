@@ -52,9 +52,9 @@ pvc:
 hpa:
   enabled: @HPA_ENABLED@
   minReplicas: 1
-  maxReplicas: 4
-  memoryUtilization: 200
-  cpuUtilization: 200
+  maxReplicas: 10
+  memoryUtilization: 80
+  cpuUtilization: 120
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 120
@@ -81,11 +81,11 @@ httpRoute:
     value: "/@BACKEND_PATH@/"
 resources:
   requests:
-    cpu: "50m"
-    memory: "250Mi"
+    cpu: "@BACKEND_REQ_CPU@"
+    memory: "@BACKEND_REQ_MEM@"
   limits:
-    memory: "750Mi"
-    cpu: "200m"
+    cpu: "@BACKEND_LIMIT_CPU@"
+    memory: "@BACKEND_LIMIT_MEM@"
 livenessProbe:
   enabled: true
   path: "/"

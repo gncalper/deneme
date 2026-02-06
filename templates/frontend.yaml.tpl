@@ -43,9 +43,9 @@ pvc:
 hpa:
   enabled: @HPA_ENABLED@
   minReplicas: 1
-  maxReplicas: 4
-  memoryUtilization: 200
-  cpuUtilization: 200
+  maxReplicas: 10
+  memoryUtilization: 80
+  cpuUtilization: 80
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 120
@@ -72,11 +72,11 @@ httpRoute:
     value: "/@FRONTEND_PATH@/"
 resources:
   requests:
-    cpu: "20m"
-    memory: "20Mi"
+    cpu: "@FRONTEND_REQ_CPU@"
+    memory: "@FRONTEND_REQ_MEM@"
   limits:
-    cpu: "40m"
-    memory: "40Mi"
+    cpu: "@FRONTEND_LIMIT_CPU@"
+    memory: "@FRONTEND_LIMIT_MEM@"
 livenessProbe:
   enabled: true
   path: "/"

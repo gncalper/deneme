@@ -135,10 +135,40 @@ pipeline {
                     def gatewayNamespace = "kuika-uat"
                     def hpaEnabled = (namespace == 'prod') ? "true" : "false"
 
+                    def backendReqCpu   = "50m"
+                    def backendReqMem   = "250Mi"
+                    def backendLimitCpu = "200m"
+                    def backendLimitMem = "750Mi"
+
+                    def frontendReqCpu   = "20m"
+                    def frontendReqMem   = "20Mi"
+                    def frontendLimitCpu = "40m"
+                    def frontendLimitMem = "40Mi"
+
+                    def workflowReqCpu   = "100m"
+                    def workflowReqMem   = "512Mi"
+                    def workflowLimitCpu = "200m"
+                    def workflowLimitMem = "750Mi"
+
                     if (namespace == 'prod') {
                         nodepool = workspace
                         gatewayName = "${workspace}-prod-gateway"
                         gatewayNamespace = "${workspace}-prod"
+
+                        backendReqCpu   = "200m"
+                        backendReqMem   = "500Mi"
+                        backendLimitCpu = "300m"
+                        backendLimitMem = "500Mi"
+
+                        frontendReqCpu   = "40m"
+                        frontendReqMem   = "40Mi"
+                        frontendLimitCpu = "40m"
+                        frontendLimitMem = "40Mi"
+
+                        workflowReqCpu   = "200m"
+                        workflowReqMem   = "600Mi"
+                        workflowLimitCpu = "300m"
+                        workflowLimitMem = "600Mi"
                     }
 
                     def workflowTpl = readFile 'templates/workflow.yaml.tpl'
@@ -155,6 +185,10 @@ pipeline {
                         .replace('@GATEWAY_NAME@', gatewayName)
                         .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
                         .replace('@HPA_ENABLED@', hpaEnabled)
+                        .replace('@WORKFLOW_REQ_CPU@', frontendReqCpu)
+                        .replace('@WORKFLOW_REQ_MEM@', frontendReqMem)
+                        .replace('@WORKFLOW_LIMIT_CPU@', frontendLimitCpu)
+                        .replace('@WORKFLOW_LIMIT_MEM@', frontendLimitMem)
 
                     writeFile file: 'values-workflow.yaml', text: workflowValues
                     echo "workflow values.yaml generated"
@@ -177,6 +211,10 @@ pipeline {
                             .replace('@GATEWAY_NAME@', gatewayName)
                             .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
                             .replace('@HPA_ENABLED@', hpaEnabled)
+                            .replace('@BACKEND_REQ_CPU@', backendReqCpu)
+                            .replace('@BACKEND_REQ_MEM@', backendReqMem)
+                            .replace('@BACKEND_LIMIT_CPU@', backendLimitCpu)
+                            .replace('@BACKEND_LIMIT_MEM@', backendLimitMem)
 
                         writeFile file: 'values-backend.yaml', text: backendValues
                         echo "backend values.yaml generated"
@@ -206,6 +244,10 @@ pipeline {
                             .replace('@GATEWAY_NAME@', gatewayName)
                             .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
                             .replace('@HPA_ENABLED@', hpaEnabled)
+                            .replace('@FRONTEND_REQ_CPU@', frontendReqCpu)
+                            .replace('@FRONTEND_REQ_MEM@', frontendReqMem)
+                            .replace('@FRONTEND_LIMIT_CPU@', frontendLimitCpu)
+                            .replace('@FRONTEND_LIMIT_MEM@', frontendLimitMem)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
                         echo "Frontend values.yaml generated"
@@ -255,7 +297,16 @@ pipeline {
                             git add ${env.TARGET_DIR}
                         """
 
-                    } else {
+                    } else if (params.PROJECT_TYPE == 'workflow') {
+
+                          sh """
+                              mkdir -p ${env.TARGET_DIR}/workflow
+                              mv values-workflow.yaml ${env.TARGET_DIR}/workflow/values.yaml
+                              git add ${env.TARGET_DIR}/workflow/values.yaml
+                          """
+                      }
+
+                    else {
 
                         sh """
                             mkdir -p ${env.TARGET_DIR}/backend
@@ -263,7 +314,6 @@ pipeline {
                             git add ${env.TARGET_DIR}
                         """
                     }
-
 
                     sh """
                             mkdir -p ${env.JENKINS_DIR}

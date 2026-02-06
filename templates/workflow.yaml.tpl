@@ -1,4 +1,4 @@
-appName: "@WORKSPACE@-@PROJECT@-uat-@BACKEND_TYPE@"
+appName: "@WORKSPACE@-@PROJECT@-@NAMESPACE@-@BACKEND_TYPE@"
 namespace: "@WORKSPACE@-uat"
 deploy:
   imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/@PROJECT@-@WORKSPACE@-@WORKSPACE@-@NAMESPACE@.kuika.com-@BACKEND_TYPE@"
@@ -8,7 +8,7 @@ labels:
   env: "@NAMESPACE@"
 replicaCount: 1
 nodeSelector:
-  nodepool: kuika-cloud-uat
+  nodepool: @NODEPOOL@
 tolerations:
   enabled: false
   values:
@@ -50,11 +50,11 @@ pvc:
       storage: 1Gi
   mountPath: /home/fileserver
 hpa:
-  enabled: false
+  enabled: @HPA_ENABLED@
   minReplicas: 1
-  maxReplicas: 4
-  memoryUtilization: 200
-  cpuUtilization: 200
+  maxReplicas: 10
+  memoryUtilization: 80
+  cpuUtilization: 80
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 120
@@ -72,8 +72,8 @@ hpa:
 httpRoute:
   enabled: true
   gateway:
-    name: kuika-uat-gateway
-    namespace: kuika-uat
+    name: @GATEWAY_NAME@
+    namespace: @GATEWAY_NAMESPACE@
   hostnames:
   - "@BACKEND_HOSTNAME@"
   path:
@@ -81,11 +81,11 @@ httpRoute:
     value: "/@BACKEND_PATH@/"
 resources:
   requests:
-    cpu: "50m"
-    memory: "250Mi"
+    cpu: "@WORKFLOW_REQ_CPU@"
+    memory: "@WORKFLOW_REQ_MEM@"
   limits:
-    memory: "750Mi"
-    cpu: "200m"
+    cpu: "@WORKFLOW_LIMIT_CPU@"
+    memory: "@WORKFLOW_LIMIT_MEM@"
 livenessProbe:
   enabled: true
   path: "/"
