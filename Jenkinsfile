@@ -322,7 +322,7 @@ pipeline {
                        """
 
                     sh """
-                        git commit -m "Jenkinsfile and values yaml added for ${params.PROJECT} and if doesn't exist create gateway "
+                        git commit -m "Jenkinsfile and values yaml added for ${params.PROJECT} and if doesn\'t exist create gateway "
 
                         if ! git push origin master; then
                             echo "Push başarısız → pull --rebase"
