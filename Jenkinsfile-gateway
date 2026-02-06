@@ -1,0 +1,81 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'WORKSPACE')
+         choice( name: 'NAMESPACE',choices: ['uat', 'prod'], description: 'Is your project for testing or production?')
+        }
+
+
+    stages {
+
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    if (!params.WORKSPACE?.trim()) {
+                        error "WORKSPACE zorunludur ve boş olamaz"
+                    }
+                }
+            }
+        }
+
+        stage('Init Vars') {
+            steps {
+                script {
+                    def workspace = params.WORKSPACE.toLowerCase()
+                    def namespace = params.NAMESPACE.toLowerCase()
+
+                    env.GATEWAY_DIR = "gateway-argo/${workspace}-gateway/${workspace}-${namespace}"
+                    echo "Gateway dir: ${env.GATEWAY_DIR}"
+                }
+            }
+        }
+
+        stage('Generate Gateway Helm Values') {
+            when {
+                expression {
+                    env.GATEWAY_DIR = "gateway-argo/${params.WORKSPACE}-gateway/${params.WORKSPACE}-${params.NAMESPACE}"
+                    def gatewayDir = "gateway-argo/${params.WORKSPACE}-gateway/${params.WORKSPACE}-${params.NAMESPACE}"
+
+                    return params.NAMESPACE == 'prod' && !fileExists(gatewayDir)
+                }
+            }
+            steps {
+                script {
+                    def workspace = params.WORKSPACE.toLowerCase()
+
+                    def gatewayTpl = readFile 'templates/gateway.yaml.tpl'
+
+                    def gatewayValues = gatewayTpl
+                        .replace('@WORKSPACE@', workspace)
+
+                    writeFile file: 'values-gateway.yaml', text: gatewayValues
+                    echo "Gateway values.yaml generated"
+                }
+            }
+        }
+
+        stage('Commit Values to Repo') {
+            when {
+                expression {
+                     params.NAMESPACE == 'prod' && !fileExists(env.GATEWAY_DIR)
+                }
+            }
+            steps {
+                script {
+                    sh """
+                        git checkout master
+                        mv values-gateway.yaml  ${env.GATEWAY_DIR}/values.yaml
+                        git commit -m "Add gateway values for ${params.WORKSPACE}"
+                        git push origin master
+                    """
+                }
+            }
+        }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}

@@ -1,0 +1,13 @@
+gateway:
+  enabled: true
+  namespace: @WORKSPACE@-prod
+  name: @WORKSPACE@-prod-gateway
+  certmap: kuika-cloud
+  className: gke-l7-global-external-managed
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+    - name: http
+      protocol: HTTP
+      port: 80
