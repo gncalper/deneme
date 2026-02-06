@@ -8,7 +8,7 @@ labels:
   env: "@NAMESPACE@"
 replicaCount: 1
 nodeSelector:
-  nodepool: kuika-cloud-uat
+  nodepool: @NODEPOOL@
 tolerations:
   enabled: false
   values:

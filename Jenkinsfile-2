@@ -76,7 +76,16 @@ pipeline {
                     def httpPathValue = params.HOST_PATH ? "true" : "false"
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
-                    def backendType = "backend"
+                    def backendType = (params.PROJECT_TYPE == 'workflow') ? "workflow" : "backend"
+                    def nodepool = "kuika-cloud-uat"
+                    def gatewayName = "kuika-uat-gateway"
+                    def gatewayNamespace = "kuika-uat"
+
+                    if (namespace == 'prod') {
+                        nodepool = workspace
+                        gatewayName = "${workspace}-prod-gateway"
+                        gatewayNamespace = "${workspace}-prod"
+                    }
 
                     if (params.PROJECT_TYPE == 'workflow') {
                         backendType = "workflow"
@@ -92,6 +101,9 @@ pipeline {
                         .replace('@BACKEND_TYPE@', backendType)
                         .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
                         .replace('@BACKEND_PATH@', params.BACKEND_PATH)
+                        .replace('@NODEPOOL@', nodepool)
+                        .replace('@GATEWAY_NAME@', gatewayName)
+                        .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
 
                     writeFile file: 'values-backend.yaml', text: backendValues
                     echo "Backend values.yaml generated"
@@ -117,6 +129,9 @@ pipeline {
                             .replace('@FRONTEND_PATH@', params.FRONTEND_PATH)
                             .replace('@ENV_FROM_SECRET@', frontendEnvFromSecret)
                             .replace('@EXTERNAL_SECRET_ENABLED@', frontendExternalSecret)
+                            .replace('@NODEPOOL@', nodepool)
+                            .replace('@GATEWAY_NAME@', gatewayName)
+                            .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
                         echo "Frontend values.yaml generated"

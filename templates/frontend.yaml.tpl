@@ -8,7 +8,7 @@ labels:
   env: "@NAMESPACE@"
 replicaCount: 1
 nodeSelector:
-  nodepool: kuika-cloud-uat
+  nodepool: @NODEPOOL@
 tolerations:
   enabled: false
   values:
@@ -63,8 +63,8 @@ hpa:
 httpRoute:
   enabled: true
   gateway:
-    name: kuika-uat-gateway
-    namespace: kuika-uat
+    name: @GATEWAY_NAME@
+    namespace: @GATEWAY_NAMESPACE@
   hostnames:
   - "@FRONTEND_HOSTNAME@"
   path:
