@@ -31,47 +31,38 @@ pipeline {
             }
         }
 
-        stage('Generate Gateway Helm Values') {
-            when {
-                expression {
-                    params.NAMESPACE.toLowerCase() == 'prod' && !fileExists(env.GATEWAY_DIR)
-                }
-            }
+        stage('Generate & Commit Gateway Values') {
             steps {
                 script {
-                    def workspace = params.WORKSPACE.toLowerCase()
 
-                    def gatewayTpl = readFile 'templates/gateway.yaml.tpl'
+                    if (params.NAMESPACE.toLowerCase() == 'prod' &&
+                        !fileExists(env.GATEWAY_DIR)) {
 
-                    def gatewayValues = gatewayTpl
-                        .replace('@WORKSPACE@', workspace)
+                        echo "Gateway directory yok, generation ve commit yapılacak."
 
-                    writeFile file: 'values-gateway.yaml', text: gatewayValues
-                    echo "Gateway values.yaml generated"
+                        def workspace = params.WORKSPACE.toLowerCase()
+                        def gatewayTpl = readFile 'templates/gateway.yaml.tpl'
+
+                        def gatewayValues = gatewayTpl
+                            .replace('@WORKSPACE@', workspace)
+
+                        writeFile file: 'values-gateway.yaml', text: gatewayValues
+
+                        sh """
+                            git checkout master
+                            mkdir -p ${env.GATEWAY_DIR}
+                            mv values-gateway.yaml ${env.GATEWAY_DIR}/values.yaml
+                            git add ${env.GATEWAY_DIR}/values.yaml
+                            git commit -m "Add gateway values for ${params.WORKSPACE}"
+                            git push origin master
+                        """
+
+                    } else {
+                        echo "Gateway zaten mevcut veya namespace prod değil. Bu stage atlandı."
+                    }
                 }
             }
         }
-
-        stage('Commit Values to Repo') {
-            when {
-                expression {
-                     params.NAMESPACE.toLowerCase() == 'prod' && !fileExists(env.GATEWAY_DIR)
-                }
-            }
-            steps {
-                script {
-                    sh """
-                        git checkout master
-                        mkdir -p ${env.GATEWAY_DIR}
-                        mv values-gateway.yaml  ${env.GATEWAY_DIR}/values.yaml
-                        git add ${env.GATEWAY_DIR}/values.yaml
-                        git commit -m "Add gateway values for ${params.WORKSPACE}"
-                        git push origin master
-                    """
-                }
-            }
-        }
-    }
     post {
         always {
             cleanWs()
