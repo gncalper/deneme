@@ -57,6 +57,24 @@ pipeline {
             }
         }
 
+        stage('Init Vars') {
+            steps {
+                script {
+                    env.WORKSPACE_LC = params.WORKSPACE.toLowerCase()
+                    env.NAMESPACE_LC = params.NAMESPACE.toLowerCase()
+
+                    env.TARGET_DIR  = "customers-argo/${params.WORKSPACE}/${params.PROJECT}/${params.WORKSPACE}-${params.NAMESPACE}"
+                    env.JENKINS_DIR = "jenkins/customer/${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+
+                    env.GATEWAY_DIR = "gateway-argo/${env.WORKSPACE_LC}-gateway/${env.WORKSPACE_LC}-${env.NAMESPACE_LC}"
+
+                    echo "TARGET_DIR : ${env.TARGET_DIR}"
+                    echo "GATEWAY_DIR: ${env.GATEWAY_DIR}"
+                    echo "JENKINS_DIR: ${env.JENKINS_DIR}"
+                }
+            }
+        }
+
         stage('Validate Target Directory') {
             steps {
                 script {
@@ -111,7 +129,7 @@ pipeline {
                     def httpPathValue = params.HOST_PATH ? "true" : "false"
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
-                    def backendType = (params.PROJECT_TYPE == 'backend') ? "backend" : "workflow"
+                    def backendType = (params.PROJECT_TYPE == 'workflow') ? "workflow" : "backend"
                     def nodepool = "kuika-cloud-uat"
                     def gatewayName = "kuika-uat-gateway"
                     def gatewayNamespace = "kuika-uat"
@@ -121,14 +139,6 @@ pipeline {
                         nodepool = workspace
                         gatewayName = "${workspace}-prod-gateway"
                         gatewayNamespace = "${workspace}-prod"
-                    }
-
-                    if (params.PROJECT_TYPE == 'workflow') {
-                        backendType = "workflow"
-                    }
-
-                    if (params.PROJECT_TYPE == 'workflow') {
-                        backendType = "workflow"
                     }
 
                     def workflowTpl = readFile 'templates/workflow.yaml.tpl'
@@ -202,58 +212,70 @@ pipeline {
             }
         }
 
-        stage('Commit to Repo') {
+        stage('Commit All Changes') {
             steps {
                 script {
+
                     sh "git checkout master"
 
+                    if (params.NAMESPACE.toLowerCase() == 'prod' &&
+                        !fileExists(env.GATEWAY_DIR)) {
 
-                        if (params.PROJECT_TYPE == 'web') {
+                        echo "Gateway yok oluşturuluyor"
 
-                            sh """
-                                mkdir -p ${env.TARGET_DIR}/backend
-                                mkdir -p ${env.TARGET_DIR}/frontend
+                        def workspace = params.WORKSPACE.toLowerCase()
+                        def gatewayTpl = readFile 'templates/gateway.yaml.tpl'
 
-                                mv values-backend.yaml  ${env.TARGET_DIR}/backend/values.yaml
-                                mv values-frontend.yaml ${env.TARGET_DIR}/frontend/values.yaml
+                        def gatewayValues = gatewayTpl
+                            .replace('@WORKSPACE@', workspace)
 
-                                git add ${env.TARGET_DIR}/backend/values.yaml
-                                git add ${env.TARGET_DIR}/frontend/values.yaml
-                            """
-
-                        } else if (params.PROJECT_TYPE == 'mobile') {
-
-                            sh """
-                                mkdir -p ${env.TARGET_DIR}/backend
-                                mv values-backend.yaml ${env.TARGET_DIR}/backend/values.yaml
-                                git add ${env.TARGET_DIR}/backend/values.yaml
-                            """
-
-                        } else if (params.PROJECT_TYPE == 'workflow') {
-
-                            sh """
-                                mkdir -p ${env.TARGET_DIR}/workflow
-                                mv values-workflow.yaml ${env.TARGET_DIR}/workflow/values.yaml
-                                git add ${env.TARGET_DIR}/workflow/values.yaml
-                            """
-                        }
-
+                        writeFile file: 'values-gateway.yaml', text: gatewayValues
 
                         sh """
-                            mkdir -p ${env.JENKINS_DIR}
-                            mv Jenkinsfile ${env.JENKINS_DIR}/Jenkinsfile
-                            git add ${env.JENKINS_DIR}/Jenkinsfile
+                            mkdir -p ${env.GATEWAY_DIR}
+                            mv values-gateway.yaml ${env.GATEWAY_DIR}/values.yaml
+                            git add ${env.GATEWAY_DIR}/values.yaml
                         """
 
+                    } else {
+                        echo "Gateway mevcut veya namespace prod değil "
+                    }
+
+
+                    if (params.PROJECT_TYPE == 'web') {
+
                         sh """
-                        git commit -m "Add ${params.PROJECT_TYPE} values and Jenkinsfile for ${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
+                            mkdir -p ${env.TARGET_DIR}/backend ${env.TARGET_DIR}/frontend
+                            mv values-backend.yaml  ${env.TARGET_DIR}/backend/values.yaml
+                            mv values-frontend.yaml ${env.TARGET_DIR}/frontend/values.yaml
+                            git add ${env.TARGET_DIR}
+                        """
+
+                    } else {
+
+                        sh """
+                            mkdir -p ${env.TARGET_DIR}/backend
+                            mv values-backend.yaml ${env.TARGET_DIR}/backend/values.yaml
+                            git add ${env.TARGET_DIR}
+                        """
+                    }
+
+
+                    sh """
+                            mkdir -p ${env.JENKINS_DIR}
+                            mv Jenkinsfile ${env.JENKINS_DIR}/Jenkinsfile
+                            git add ${env.JENKINS_DIR}
+                       """
+
+                    sh """
+                        git commit -m "Add ${params.PROJECT_TYPE} + gateway + Jenkinsfile for ${params.WORKSPACE}/${params.PROJECT}/${params.NAMESPACE}"
 
                         if ! git push origin master; then
-                            echo "Push başarısız, pull --rebase yapılıyor..."
+                            echo "Push başarısız → pull --rebase"
                             git pull --rebase origin master
                             git push origin master
                         fi
-                        """
+                    """
                 }
             }
         }
