@@ -80,6 +80,7 @@ pipeline {
                     def nodepool = "kuika-cloud-uat"
                     def gatewayName = "kuika-uat-gateway"
                     def gatewayNamespace = "kuika-uat"
+                    def hpaEnabled = (namespace == 'prod') ? "true" : "false"
 
                     if (namespace == 'prod') {
                         nodepool = workspace
@@ -104,6 +105,7 @@ pipeline {
                         .replace('@NODEPOOL@', nodepool)
                         .replace('@GATEWAY_NAME@', gatewayName)
                         .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
+                        .replace('@HPA_ENABLED@', hpaEnabled)
 
                     writeFile file: 'values-backend.yaml', text: backendValues
                     echo "Backend values.yaml generated"
@@ -132,6 +134,7 @@ pipeline {
                             .replace('@NODEPOOL@', nodepool)
                             .replace('@GATEWAY_NAME@', gatewayName)
                             .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
+                            .replace('@HPA_ENABLED@', hpaEnabled)
 
                         writeFile file: 'values-frontend.yaml', text: frontendValues
                         echo "Frontend values.yaml generated"

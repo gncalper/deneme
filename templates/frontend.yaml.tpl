@@ -41,7 +41,7 @@ pvc:
       storage: 1Gi
   mountPath: /home/fileserver
 hpa:
-  enabled: false
+  enabled: @HPA_ENABLED@
   minReplicas: 1
   maxReplicas: 4
   memoryUtilization: 200
