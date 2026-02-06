@@ -64,6 +64,7 @@ pipeline {
                         git checkout master
                         mkdir -p ${env.GATEWAY_DIR}
                         mv values-gateway.yaml  ${env.GATEWAY_DIR}/values.yaml
+                        git add ${env.GATEWAY_DIR}/values.yaml
                         git commit -m "Add gateway values for ${params.WORKSPACE}"
                         git push origin master
                     """
