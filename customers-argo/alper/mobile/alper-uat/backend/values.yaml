@@ -1,0 +1,104 @@
+appName: "alper-mobile-uat-backend"
+namespace: "alper-uat"
+deploy:
+  imageName: "europe-west4-docker.pkg.dev/kuikacloudservers/docker-repository/kuika/mobile-alper-alper-uat.kuika.com-backend"
+  tag: "1"
+labels:
+  customer: "alper"
+  env: "uat"
+replicaCount: 1
+nodeSelector:
+  nodepool: kuika-cloud-uat
+tolerations:
+  enabled: false
+  values:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "amd64"
+    effect: "NoSchedule"
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+env:
+- name: DOTNET_TieredPGO
+  value: "1"
+- name: DOTNET_ReadyToRun
+  value: "1"
+- name: DOTNET_GCHeapHardLimitPercent
+  value: "70"
+- name: ASPNETCORE_URLS
+  value: "http://0.0.0.0:8080"
+envFromSecret: true
+externalSecret:
+  enabled: true
+  refreshInterval: 1h0m0s
+  target:
+    creationPolicy: Owner
+  secretStoreRef:
+    name: gcp-store
+    kind: ClusterSecretStore
+  key: alper-mobile-backend-secret-uat
+pvc:
+  enabled: false
+  storageClassName: "standard-rwo"
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  mountPath: /home/fileserver
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  memoryUtilization: 80
+  cpuUtilization: 120
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 120
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+
+httpRoute:
+  enabled: true
+  gateway:
+    name: kuika-uat-gateway
+    namespace: kuika-uat
+  hostnames:
+  - "sdaf"
+  path:
+    enabled: false
+    value: "//"
+resources:
+  requests:
+    cpu: "50m"
+    memory: "250Mi"
+  limits:
+    cpu: "200m"
+    memory: "750Mi"
+livenessProbe:
+  enabled: true
+  path: "/"
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 3
+readinessProbe:
+  enabled: true
+  path: "/"
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 10
+  failureThreshold: 3
+startupProbe:
+  enabled: true
+  type: tcp
+  port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 10
+  failureThreshold: 120
