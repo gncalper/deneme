@@ -34,10 +34,7 @@ pipeline {
         stage('Generate Gateway Helm Values') {
             when {
                 expression {
-                    env.GATEWAY_DIR = "gateway-argo/${params.WORKSPACE}-gateway/${params.WORKSPACE}-${params.NAMESPACE}"
-                    def gatewayDir = "gateway-argo/${params.WORKSPACE}-gateway/${params.WORKSPACE}-${params.NAMESPACE}"
-
-                    return params.NAMESPACE == 'prod' && !fileExists(gatewayDir)
+                    params.NAMESPACE.toLowerCase() == 'prod' && !fileExists(env.GATEWAY_DIR)
                 }
             }
             steps {
@@ -58,7 +55,7 @@ pipeline {
         stage('Commit Values to Repo') {
             when {
                 expression {
-                     params.NAMESPACE == 'prod' && !fileExists(env.GATEWAY_DIR)
+                     params.NAMESPACE.toLowerCase() == 'prod' && !fileExists(env.GATEWAY_DIR)
                 }
             }
             steps {
