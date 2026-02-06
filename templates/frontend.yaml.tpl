@@ -53,12 +53,6 @@ hpa:
       - type: Percent
         value: 100
         periodSeconds: 60
-    scaleDown:
-      stabilizationWindowSeconds: 300
-      policies:
-      - type: Percent
-        value: 50
-        periodSeconds: 60
 
 httpRoute:
   enabled: true
