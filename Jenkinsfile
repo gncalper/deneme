@@ -111,7 +111,21 @@ pipeline {
                     def httpPathValue = params.HOST_PATH ? "true" : "false"
                     def workspace = params.WORKSPACE.toLowerCase()
                     def project   = params.PROJECT.toLowerCase()
-                    def backendType = "backend"
+                    def backendType = (params.PROJECT_TYPE == 'backend') ? "backend" : "workflow"
+                    def nodepool = "kuika-cloud-uat"
+                    def gatewayName = "kuika-uat-gateway"
+                    def gatewayNamespace = "kuika-uat"
+                    def hpaEnabled = (namespace == 'prod') ? "true" : "false"
+
+                    if (namespace == 'prod') {
+                        nodepool = workspace
+                        gatewayName = "${workspace}-prod-gateway"
+                        gatewayNamespace = "${workspace}-prod"
+                    }
+
+                    if (params.PROJECT_TYPE == 'workflow') {
+                        backendType = "workflow"
+                    }
 
                     if (params.PROJECT_TYPE == 'workflow') {
                         backendType = "workflow"
@@ -127,6 +141,10 @@ pipeline {
                         .replace('@BACKEND_TYPE@', backendType)
                         .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
                         .replace('@BACKEND_PATH@', params.BACKEND_PATH)
+                        .replace('@NODEPOOL@', nodepool)
+                        .replace('@GATEWAY_NAME@', gatewayName)
+                        .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
+                        .replace('@HPA_ENABLED@', hpaEnabled)
 
                     writeFile file: 'values-workflow.yaml', text: workflowValues
                     echo "workflow values.yaml generated"
@@ -145,6 +163,10 @@ pipeline {
                             .replace('@BACKEND_TYPE@', backendType)
                             .replace('@BACKEND_HOSTNAME@', params.BACKEND_HOSTNAME)
                             .replace('@BACKEND_PATH@', params.BACKEND_PATH)
+                            .replace('@NODEPOOL@', nodepool)
+                            .replace('@GATEWAY_NAME@', gatewayName)
+                            .replace('@GATEWAY_NAMESPACE@', gatewayNamespace)
+                            .replace('@HPA_ENABLED@', hpaEnabled)
 
                         writeFile file: 'values-backend.yaml', text: backendValues
                         echo "backend values.yaml generated"
