@@ -20,6 +20,8 @@ pipeline {
         stage('Check NodePool Exists') {
             steps {
                 script {
+                    def workspaceLower = params.WORKSPACE.toLowerCase()
+
                     def exists = sh(
                         script: """
                           gcloud container node-pools list \
@@ -47,6 +49,8 @@ pipeline {
             }
             steps {
                 script {
+                    def workspaceLower = params.WORKSPACE.toLowerCase()
+
                     sh """
                       gcloud container node-pools create ${params.WORKSPACE} \
                         --cluster kuika-cloud-cluster \
