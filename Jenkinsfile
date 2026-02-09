@@ -1,6 +1,11 @@
 pipeline {
-    agent any
 
+    agent {
+        node {
+            label 'platform'
+
+        }
+    }
     parameters {
         string(name: 'WORKSPACE')
         string(name: 'PROJECT')
@@ -12,6 +17,7 @@ pipeline {
         string(name: 'BACKEND_PATH', defaultValue: '', description: 'Path (Host path checkbox işaretli ise uygulamanın backend pathi var ise değer giriniz yoksa boş bırakınız)' )
         string(name: 'FRONTEND_HOSTNAME', description: 'Uygulamanın frontend url ini girin')
         string(name: 'FRONTEND_PATH', defaultValue: '', description: 'Path (Host path checkbox işaretli ise uygulamanın frontend pathi var ise değer giriniz yoksa boş bırakınız)' )
+        string(name: 'DB_NAME', description: 'Db name giriniz')
         }
 
     stages {
@@ -91,6 +97,166 @@ pipeline {
             }
         }
 
+        stage('Check NodePool Exists') {
+            when {
+                    expression { params.NAMESPACE == 'prod' }
+                }
+            steps {
+                script {
+                    def workspaceLower = params.WORKSPACE.toLowerCase()
+
+                    def exists = sh(
+                        script: """
+                          gcloud container node-pools list \
+                            --cluster kuika-cloud-cluster \
+                            --region europe-west4 \
+                            --format="value(name)" | grep -w ${params.WORKSPACE} || true
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    if (exists) {
+                        env.NODEPOOL_EXISTS = "true"
+                        echo "Nodepool ${params.WORKSPACE} zaten mevcut. Create stage atlanacak."
+                    } else {
+                        env.NODEPOOL_EXISTS = "false"
+                        echo "Nodepool bulunamadı. Create edilecek."
+                    }
+                }
+            }
+        }
+
+        stage('Create NodePool') {
+            when {
+                allOf {
+                    expression { params.NAMESPACE == 'prod' }
+                    expression { env.NODEPOOL_EXISTS == "false" }
+                }
+            }
+            steps {
+                script {
+                    def workspaceLower = params.WORKSPACE.toLowerCase()
+
+                    sh """
+                      gcloud container node-pools create ${params.WORKSPACE} \
+                        --cluster kuika-cloud-cluster \
+                        --region europe-west4 \
+                        --machine-type e2-custom-2-4096 \
+                        --disk-type pd-standard \
+                        --disk-size 30 \
+                        --enable-autoscaling \
+                        --min-nodes 0 \
+                        --max-nodes 6 \
+                        --num-nodes 0 \
+                        --node-labels=nodepool=${params.WORKSPACE} \
+                        --labels=nodepool=${params.WORKSPACE} \
+                        --pod-ipv4-range=k8s-prod-pod-ip-range
+                    """
+                }
+            }
+        }
+
+
+        stage('Create GCP Secrets') {
+            steps {
+                script {
+                    def workspace = params.WORKSPACE.toLowerCase()
+                    def project   = params.PROJECT.toLowerCase()
+
+                    withCredentials([
+                        string(credentialsId: 'db-user', variable: 'DB_USER'),
+                        string(credentialsId: 'db-password', variable: 'DB_PASSWORD')
+                    ])
+                    {
+                      withEnv([
+                          "WORKSPACE_LOWER=${workspace}",
+                          "PROJECT_LOWER=${project}"
+                      ])
+
+                    {
+                    sh '''
+                    set -e
+
+                    echo " WORKSPACE    : $WORKSPACE"
+                    echo " PROJECT      : $PROJECT"
+                    echo " PROJECT_TYPE : $PROJECT_TYPE"
+                    echo " NAMESPACE    : $NAMESPACE"
+                    echo "=============================="
+
+                    # 1️⃣ HANGİ COMPONENT’LER OLUŞACAK?
+                    # -------------------------------------------------
+                    case "$PROJECT_TYPE:$NAMESPACE" in
+                      web:prod)
+                        COMPONENTS="frontend backend"
+                        ;;
+                      web:uat)
+                        COMPONENTS="backend"
+                        ;;
+                      workflow:uat|workflow:prod)
+                        COMPONENTS="workflow"
+                        ;;
+                      mobile:uat|mobile:prod)
+                        COMPONENTS="mobile"
+                        ;;
+                      *)
+                        echo "❌ Unsupported PROJECT_TYPE / NAMESPACE combination"
+                        exit 1
+                        ;;
+                    esac
+
+                    echo "Components to create: $COMPONENTS"
+
+                    # -------------------------------------------------
+                    # 2️⃣ COMPONENT LOOP
+                    # -------------------------------------------------
+                    for COMPONENT in $COMPONENTS; do
+                        SECRET_NAME="${WORKSPACE_LOWER}-${PROJECT_LOWER}-${COMPONENT}-secret-${NAMESPACE}"
+                        TEMPLATE="cred-templates/${COMPONENT}-${NAMESPACE}.json.tpl"
+                        OUTPUT_FILE="secret-${COMPONENT}.json"
+
+                        echo "----------------------------------------"
+                        echo "Component   : $COMPONENT"
+                        echo "Secret Name : $SECRET_NAME"
+                        echo "Template    : $TEMPLATE"
+                        echo "----------------------------------------"
+
+                        # Secret varsa hata ver
+                        if gcloud secrets describe "$SECRET_NAME" >/dev/null 2>&1; then
+                            echo "❌ Secret already exists: $SECRET_NAME"
+                            exit 1
+                        fi
+
+                        # Template yoksa hata ver
+                        if [ ! -f "$TEMPLATE" ]; then
+                            echo "❌ Template file not found: $TEMPLATE"
+                            exit 1
+                        fi
+
+                        # JSON oluştur
+                        sed \
+                          -e "s|\\\${DB_USER}|$DB_USER|g" \
+                          -e "s|\\\${DB_PASSWORD}|$DB_PASSWORD|g" \
+                          -e "s|\\\${BACKEND_HOSTNAME}|$BACKEND_HOSTNAME|g" \
+                          -e "s|\\\${BACKEND_PATH}|$BACKEND_PATH|g" \
+                          -e "s|\\\${DB_NAME}|$DB_NAME|g" \
+                          "$TEMPLATE" > "$OUTPUT_FILE"
+
+                        # Secret oluştur
+                        gcloud secrets create "$SECRET_NAME" \
+                          --replication-policy=automatic
+
+                        # Secret version ekle
+                        gcloud secrets versions add "$SECRET_NAME" \
+                          --data-file="$OUTPUT_FILE"
+
+                        echo "✅ Secret created successfully: $SECRET_NAME"
+                    done
+                    '''
+                        }
+                    }
+                }
+            }
+        }
 
         stage('Generate Jenkinsfile') {
             steps {
