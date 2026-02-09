@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'WORKSPACE')
+    }
+
+    stages {
+
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    if (!params.WORKSPACE?.trim()) {
+                        error "WORKSPACE zorunludur ve boş olamaz"
+                    }
+                }
+            }
+        }
+
+        stage('Check NodePool Exists') {
+            steps {
+                script {
+                    def exists = sh(
+                        script: """
+                          gcloud container node-pools list \
+                            --cluster kuika-cloud-cluster \
+                            --region europe-west4 \
+                            --format="value(name)" | grep -w ${params.WORKSPACE} || true
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    if (exists) {
+                        env.NODEPOOL_EXISTS = "true"
+                        echo "Nodepool ${params.WORKSPACE} zaten mevcut. Create stage atlanacak."
+                    } else {
+                        env.NODEPOOL_EXISTS = "false"
+                        echo "Nodepool bulunamadı. Create edilecek."
+                    }
+                }
+            }
+        }
+
+        stage('Create NodePool') {
+            when {
+                expression { env.NODEPOOL_EXISTS == "false" }
+            }
+            steps {
+                script {
+                    sh """
+                      gcloud container node-pools create ${params.WORKSPACE} \
+                        --cluster kuika-cloud-cluster \
+                        --region europe-west4 \
+                        --machine-type e2-custom-2-4096 \
+                        --disk-type pd-standard \
+                        --disk-size 30 \
+                        --enable-autoscaling \
+                        --min-nodes 0 \
+                        --max-nodes 6 \
+                        --num-nodes 0 \
+                        --node-labels=nodepool=${params.WORKSPACE} \
+                        --labels=nodepool=${params.WORKSPACE} \
+                        --pod-range=k8s-prod-pod-ip-range
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
