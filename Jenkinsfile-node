@@ -64,7 +64,7 @@ pipeline {
                         --num-nodes 0 \
                         --node-labels=nodepool=${params.WORKSPACE} \
                         --labels=nodepool=${params.WORKSPACE} \
-                        --pod-range=k8s-prod-pod-ip-range
+                        --pod-ipv4-range=k8s-prod-pod-ip-range
                     """
                 }
             }
