@@ -7,6 +7,7 @@ pipeline {
     }
     parameters {
         string(name: 'WORKSPACE')
+        choice( name: 'NAMESPACE',choices: ['uat', 'prod'], description: 'Is your project for testing or production?')
     }
 
     stages {
@@ -22,6 +23,9 @@ pipeline {
         }
 
         stage('Check NodePool Exists') {
+            when {
+                    expression { params.NAMESPACE == 'prod' }
+                }
             steps {
                 script {
                     def workspaceLower = params.WORKSPACE.toLowerCase()
@@ -49,7 +53,10 @@ pipeline {
 
         stage('Create NodePool') {
             when {
-                expression { env.NODEPOOL_EXISTS == "false" }
+                allOf {
+                    expression { params.NAMESPACE == 'prod' }
+                    expression { env.NODEPOOL_EXISTS == "false" }
+                }
             }
             steps {
                 script {
